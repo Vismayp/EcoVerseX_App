@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
 import '../../widgets/custom_button.dart';
@@ -41,14 +42,25 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(8.0),
           child: AppLogo(),
         ),
-        title: const Text('Carbon Market'),
+        title: Text(
+          'Carbon Market',
+          style: AppTheme.headlineMedium.copyWith(fontSize: 20),
+        ),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: AppColors.primary,
+          indicatorWeight: 3,
+          labelStyle: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(text: 'Calculator'),
             Tab(text: 'Marketplace'),
@@ -73,18 +85,20 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen>
         children: [
           Text(
             'Calculate Your Impact',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: AppTheme.headlineMedium,
           ),
           const SizedBox(height: 8),
-          const Text('Estimate carbon sequestration based on trees planted.'),
+          Text(
+            'Estimate carbon sequestration based on trees planted.',
+            style: AppTheme.bodyMedium.copyWith(color: AppColors.textSecondary),
+          ),
           const SizedBox(height: 32),
           CustomTextField(
             label: 'Number of Mango Trees',
             hint: 'e.g., 10',
             keyboardType: TextInputType.number,
             controller: _treeCountController,
+            prefixIcon: Icons.forest_outlined,
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -99,32 +113,58 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Estimated Sequestration',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: AppTheme.bodyLarge.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '${_calculatedCarbon.toStringAsFixed(1)} kg CO2/year',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+                    style: AppTheme.displayLarge.copyWith(
+                      color: Colors.white,
+                      fontSize: 32,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'This is equivalent to driving a car for:',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  Text(
-                    '${(_calculatedCarbon / 0.2).toStringAsFixed(0)} km', // Approx 0.2kg/km
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.directions_car,
+                            color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Equivalent to driving: ${(_calculatedCarbon / 0.2).toStringAsFixed(0)} km',
+                          style:
+                              AppTheme.bodyMedium.copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -141,46 +181,95 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen>
       itemCount: projects.length,
       itemBuilder: (context, index) {
         final project = projects[index];
-        return Card(
+        return Container(
           margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: AppColors.border),
+          ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  project.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(project.location,
-                        style: const TextStyle(color: Colors.grey)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(project.description),
-                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '\$${project.pricePerTon}/ton',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                    Expanded(
+                      child: Text(
+                        project.name,
+                        style: AppTheme.headlineSmall.copyWith(fontSize: 18),
                       ),
                     ),
-                    ElevatedButton(
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Verified',
+                        style: AppTheme.caption.copyWith(
+                          color: AppColors.accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.location_on,
+                        size: 16, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      project.location,
+                      style: AppTheme.bodyMedium
+                          .copyWith(color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  project.description,
+                  style: AppTheme.bodyMedium,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Price per Ton',
+                          style: AppTheme.caption,
+                        ),
+                        Text(
+                          '\$${project.pricePerTon}',
+                          style: AppTheme.headlineSmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    CustomButton(
+                      text: 'Buy Offset',
                       onPressed: () {},
-                      child: const Text('Buy Offset'),
+                      width: 120,
+                      height: 40,
+                      backgroundColor: AppColors.secondary,
                     ),
                   ],
                 ),

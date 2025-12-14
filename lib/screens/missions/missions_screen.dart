@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../widgets/custom_button.dart';
 
 class MissionsScreen extends StatelessWidget {
   const MissionsScreen({super.key});
@@ -10,6 +12,7 @@ class MissionsScreen extends StatelessWidget {
     final missions = MockData.missions;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: missions.length,
@@ -22,10 +25,22 @@ class MissionsScreen extends StatelessWidget {
   }
 
   Widget _buildMissionCard(BuildContext context, Mission mission) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: AppColors.border),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -35,42 +50,48 @@ class MissionsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     mission.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: AppTheme.headlineSmall.copyWith(fontSize: 18),
                   ),
                 ),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.amber[100],
+                    color: AppColors.accent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    '${mission.reward} Coins',
-                    style: const TextStyle(
-                      color: Colors.brown,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.monetization_on,
+                          size: 14, color: AppColors.accent),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${mission.reward} Coins',
+                        style: AppTheme.caption.copyWith(
+                          color: AppColors.accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               mission.description,
-              style: TextStyle(color: Colors.grey[600]),
+              style:
+                  AppTheme.bodyMedium.copyWith(color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Row(
               children: [
-                Icon(Icons.timer, size: 16, color: Colors.grey[500]),
+                Icon(Icons.timer_outlined,
+                    size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   '${mission.durationDays} Days',
-                  style: TextStyle(color: Colors.grey[500]),
+                  style: AppTheme.caption,
                 ),
                 const Spacer(),
                 if (mission.isJoined)
@@ -78,17 +99,20 @@ class MissionsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        LinearProgressIndicator(
-                          value: mission.progress,
-                          backgroundColor: Colors.grey[200],
-                          color: Theme.of(context).colorScheme.primary,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: mission.progress,
+                            backgroundColor: AppColors.background,
+                            color: AppColors.primary,
+                            minHeight: 8,
+                          ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           '${(mission.progress * 100).toInt()}% Complete',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.primary,
+                          style: AppTheme.caption.copyWith(
+                            color: AppColors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -96,12 +120,12 @@ class MissionsScreen extends StatelessWidget {
                     ),
                   )
                 else
-                  ElevatedButton(
+                  CustomButton(
+                    text: 'Join Mission',
                     onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                    ),
-                    child: const Text('Join Mission'),
+                    width: 120,
+                    height: 36,
+                    backgroundColor: AppColors.secondary,
                   ),
               ],
             ),

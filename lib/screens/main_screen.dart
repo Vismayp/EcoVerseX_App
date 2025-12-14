@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../widgets/app_logo.dart';
+import '../config/theme.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_text_field.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'missions/missions_screen.dart';
 import 'shop/shop_screen.dart';
@@ -24,70 +26,93 @@ class _MainScreenState extends State<MainScreen> {
     const CommunityScreen(),
   ];
 
+  String _getAppBarTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'Dashboard';
+      case 1:
+        return 'Missions';
+      case 2:
+        return 'Eco Shop';
+      case 3:
+        return 'Community';
+      default:
+        return 'EcoVerseX';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: AppLogo(),
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        title: Text(
+          _getAppBarTitle(_selectedIndex),
+          style: AppTheme.headlineMedium.copyWith(fontSize: 20),
         ),
-        title: const Text('EcoVerseX'),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.notifications_outlined,
+                color: AppColors.textPrimary),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () {},
-          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _screens[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Home',
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: AppColors.primary.withOpacity(0.1),
+          labelTextStyle: MaterialStateProperty.all(
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.flag_outlined),
-            selectedIcon: Icon(Icons.flag),
-            label: 'Missions',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_bag_outlined),
-            selectedIcon: Icon(Icons.shopping_bag),
-            label: 'Shop',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outlined),
-            selectedIcon: Icon(Icons.people),
-            label: 'Community',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          backgroundColor: Colors.white,
+          elevation: 0,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.flag_outlined),
+              selectedIcon: Icon(Icons.flag, color: AppColors.primary),
+              label: 'Missions',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.shopping_bag_outlined),
+              selectedIcon: Icon(Icons.shopping_bag, color: AppColors.primary),
+              label: 'Shop',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.people_outlined),
+              selectedIcon: Icon(Icons.people, color: AppColors.primary),
+              label: 'Community',
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implement Activity Logging
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
+            backgroundColor: Colors.transparent,
             builder: (context) => const ActivityLogSheet(),
           );
         },
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.secondary,
+        child: const Icon(Icons.add, color: Colors.black),
       ),
     );
   }
@@ -140,7 +165,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Color(0xFF2E7D32)),
+                leading: const Icon(Icons.camera_alt, color: AppColors.primary),
                 title: const Text('Take Photo'),
                 onTap: () {
                   Navigator.pop(context);
@@ -149,7 +174,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
               ),
               ListTile(
                 leading:
-                    const Icon(Icons.photo_library, color: Color(0xFF2E7D32)),
+                    const Icon(Icons.photo_library, color: AppColors.primary),
                 title: const Text('Choose from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
@@ -166,154 +191,151 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: const EdgeInsets.all(24),
-      height: MediaQuery.of(context).size.height * 0.75,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Log Activity',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Image Upload Section
-            const Text(
-              'Add Photo (Optional)',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+      height: MediaQuery.of(context).size.height * 0.85,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Log Activity',
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
-            ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: _showImageSourceDialog,
-              child: Container(
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 2,
-                    style: BorderStyle.solid,
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add Photo (Optional)',
+                    style: Theme.of(context).textTheme.labelLarge,
                   ),
-                ),
-                child: _selectedImage == null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_photo_alternate,
-                            size: 60,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Tap to add photo',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Stack(
-                          children: [
-                            Image.file(
-                              File(_selectedImage!.path),
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: CircleAvatar(
-                                backgroundColor: Colors.black54,
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedImage = null;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: _showImageSourceDialog,
+                    child: Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.grey.withOpacity(0.2),
+                          width: 2,
+                          style: BorderStyle.solid,
                         ),
                       ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Placeholder for activity logging form
-            const Text(
-              'Select Category',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildCategoryButton(
-                    context, Icons.directions_bike, 'Transport'),
-                _buildCategoryButton(context, Icons.restaurant, 'Food'),
-                _buildCategoryButton(context, Icons.delete, 'Waste'),
-                _buildCategoryButton(context, Icons.bolt, 'Energy'),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Description',
-                hintText: 'e.g., Cycled 5km to work',
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Submit activity with image
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Activity logged successfully!'),
-                      backgroundColor: Color(0xFF2E7D32),
+                      child: _selectedImage == null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Tap to add photo',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Stack(
+                                children: [
+                                  Image.file(
+                                    File(_selectedImage!.path),
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.black54,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _selectedImage = null;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                     ),
-                  );
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Submit Activity'),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Select Category',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildCategoryButton(
+                          context, Icons.directions_bike, 'Transport'),
+                      _buildCategoryButton(context, Icons.restaurant, 'Food'),
+                      _buildCategoryButton(
+                          context, Icons.delete_outline, 'Waste'),
+                      _buildCategoryButton(context, Icons.bolt, 'Energy'),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const CustomTextField(
+                    label: 'Description',
+                    hint: 'e.g., Cycled 5km to work',
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomButton(
+                      text: 'Submit Activity',
+                      onPressed: () {
+                        // TODO: Submit activity with image
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Activity logged successfully!'),
+                            backgroundColor: AppColors.primary,
+                          ),
+                        );
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -329,26 +351,40 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
       },
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.primaryContainer,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary
+                    : Colors.grey.withOpacity(0.2),
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ]
+                  : [],
+            ),
             child: Icon(
               icon,
-              color: isSelected
-                  ? Colors.white
-                  : Theme.of(context).colorScheme.primary,
+              color: isSelected ? Colors.white : Colors.grey[600],
+              size: 24,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.black87,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              color: isSelected ? AppColors.primary : Colors.grey[600],
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../widgets/stat_card.dart';
 import '../../widgets/beautiful_tree_widget.dart';
@@ -12,241 +13,246 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = MockData.currentUser;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header removed as it is now in MainScreen AppBar
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hello, ${user.name.split(' ')[0]}! 👋',
+                  style: AppTheme.headlineMedium,
+                ),
+                Text(
+                  'Let\'s make an impact today',
+                  style: AppTheme.bodyMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // EcoCoins & Tier Card
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Hello, ${user.name.split(' ')[0]}! 👋',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total Balance',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${user.walletBalance}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'Tier: ${user.tier}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    'Tier: ${user.tier}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.eco,
+                      color: AppColors.secondary,
+                      size: 32,
                     ),
                   ),
                 ],
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF2E7D32), // Dark green
-                      const Color(0xFF388E3C), // Medium green
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF2E7D32).withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+            ),
+            const SizedBox(height: 24),
+
+            // Tree Visualization
+            BeautifulTreeWidget(
+              streakCount: user.streakCount,
+              progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Stats Grid
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.5,
+              children: [
+                StatCard(
+                  label: 'Carbon Saved',
+                  value: '${user.carbonSaved} kg',
+                  icon: Icons.cloud_off,
+                  color: Colors.blueGrey,
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.eco,
-                        color: Colors.white,
-                        size: 20,
+                StatCard(
+                  label: 'Water Saved',
+                  value: '${user.waterSaved} L',
+                  icon: Icons.water_drop,
+                  color: Colors.blue,
+                ),
+                StatCard(
+                  label: 'Waste Reduced',
+                  value: '${user.wasteReduced} kg',
+                  icon: Icons.delete_outline,
+                  color: Colors.brown,
+                ),
+                StatCard(
+                  label: 'Trees Planted',
+                  value:
+                      '${(user.carbonSaved / 22).toStringAsFixed(1)}', // Approx 22kg per tree
+                  icon: Icons.forest,
+                  color: AppColors.primary,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Quick Actions
+            Text(
+              'Explore',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontSize: 20),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickActionCard(
+                    context,
+                    'AgriTours',
+                    Icons.agriculture,
+                    Colors.orange,
+                    () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ToursScreen())),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildQuickActionCard(
+                    context,
+                    'Carbon Market',
+                    Icons.co2,
+                    Colors.teal,
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const CarbonMarketScreen())),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Recent Activity
+            Text(
+              'Recent Activity',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontSize: 20),
+            ),
+            const SizedBox(height: 16),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: MockData.recentActivities.length,
+              itemBuilder: (context, index) {
+                final activity = MockData.recentActivities[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      child: Icon(
+                        _getActivityIcon(activity.category),
+                        color: AppColors.primary,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+                    title: Text(activity.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(activity.date.toString().split(' ')[0]),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text(
-                          'EcoCoins',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
+                        Text(
+                          '+${activity.coinReward} Coins',
+                          style: const TextStyle(
+                            color: Colors.amber,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '${user.walletBalance}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Colors.white,
+                          activity.status,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: activity.status == 'Approved'
+                                ? AppColors.primary
+                                : Colors.orange,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Tree Visualization
-          BeautifulTreeWidget(
-            streakCount: user.streakCount,
-            progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Stats Grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.5,
-            children: [
-              StatCard(
-                label: 'Carbon Saved',
-                value: '${user.carbonSaved} kg',
-                icon: Icons.cloud_off,
-                color: Colors.blueGrey,
-              ),
-              StatCard(
-                label: 'Water Saved',
-                value: '${user.waterSaved} L',
-                icon: Icons.water_drop,
-                color: Colors.blue,
-              ),
-              StatCard(
-                label: 'Waste Reduced',
-                value: '${user.wasteReduced} kg',
-                icon: Icons.delete_outline,
-                color: Colors.brown,
-              ),
-              StatCard(
-                label: 'Trees Planted',
-                value:
-                    '${(user.carbonSaved / 22).toStringAsFixed(1)}', // Approx 22kg per tree
-                icon: Icons.forest,
-                color: Colors.green,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Quick Actions
-          Text(
-            'Explore',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildQuickActionCard(
-                  context,
-                  'AgriTours',
-                  Icons.agriculture,
-                  Colors.orange,
-                  () => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const ToursScreen())),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildQuickActionCard(
-                  context,
-                  'Carbon Market',
-                  Icons.co2,
-                  Colors.teal,
-                  () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const CarbonMarketScreen())),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Recent Activity
-          Text(
-            'Recent Activity',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: MockData.recentActivities.length,
-            itemBuilder: (context, index) {
-              final activity = MockData.recentActivities[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .secondary
-                        .withOpacity(0.2),
-                    child: Icon(
-                      _getActivityIcon(activity.category),
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
                   ),
-                  title: Text(activity.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(activity.date.toString().split(' ')[0]),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '+${activity.coinReward} Coins',
-                        style: const TextStyle(
-                          color: Colors.amber,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        activity.status,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: activity.status == 'Approved'
-                              ? Colors.green
-                              : Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -258,19 +264,33 @@ class DashboardScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: color),
-            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 28, color: color),
+            ),
+            const SizedBox(height: 12),
             Text(
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: color.withOpacity(0.8),
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -286,7 +306,7 @@ class DashboardScreen extends StatelessWidget {
       case 'Food':
         return Icons.restaurant;
       case 'Waste':
-        return Icons.delete;
+        return Icons.delete_outline;
       case 'Energy':
         return Icons.bolt;
       default:

@@ -1,30 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../config/theme.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
   final Color? color;
+  final bool withBackground;
 
   const AppLogo({
     super.key,
-    this.size = 32,
+    this.size = 40,
     this.color,
+    this.withBackground = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!withBackground) {
+      return Icon(
+        Icons.eco_rounded,
+        size: size,
+        color: color ?? AppColors.primary,
+      );
+    }
+
     return Container(
       width: size,
       height: size,
-      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [AppColors.primary, AppColors.secondary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(size * 0.25),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Icon(
-        Icons.eco,
-        size: size * 0.7,
-        color: color ?? Theme.of(context).colorScheme.primary,
+      child: Center(
+        child: Icon(
+          Icons.eco_rounded,
+          size: size * 0.6,
+          color: Colors.white,
+        ),
       ),
     );
   }

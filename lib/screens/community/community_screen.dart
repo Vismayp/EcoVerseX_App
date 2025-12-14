@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../widgets/custom_button.dart';
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key});
@@ -10,6 +12,7 @@ class CommunityScreen extends StatelessWidget {
     final groups = MockData.communityGroups;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -17,9 +20,7 @@ class CommunityScreen extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             'EcoCircles',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: AppTheme.headlineMedium.copyWith(fontSize: 20),
           ),
           const SizedBox(height: 16),
           ...groups.map((group) => _buildGroupCard(context, group)),
@@ -29,23 +30,39 @@ class CommunityScreen extends StatelessWidget {
   }
 
   Widget _buildLeaderboard(BuildContext context) {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: AppColors.border),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Global Leaderboard',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+            Row(
+              children: [
+                Icon(Icons.leaderboard, color: AppColors.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Global Leaderboard',
+                  style: AppTheme.headlineSmall.copyWith(fontSize: 18),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildLeaderboardItem(context, 1, 'Sarah J.', 1200, true),
-            const Divider(),
+            const Divider(height: 24),
             _buildLeaderboardItem(context, 2, 'Mike T.', 1150, false),
-            const Divider(),
+            const Divider(height: 24),
             _buildLeaderboardItem(
                 context, 3, 'Arjun K.', 1100, false), // Current User
           ],
@@ -56,36 +73,50 @@ class CommunityScreen extends StatelessWidget {
 
   Widget _buildLeaderboardItem(
       BuildContext context, int rank, String name, int score, bool isTop) {
+    Color rankColor;
+    if (rank == 1) {
+      rankColor = const Color(0xFFFFD700); // Gold
+    } else if (rank == 2) {
+      rankColor = const Color(0xFFC0C0C0); // Silver
+    } else if (rank == 3) {
+      rankColor = const Color(0xFFCD7F32); // Bronze
+    } else {
+      rankColor = Colors.grey[300]!;
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Container(
-            width: 30,
-            height: 30,
+            width: 36,
+            height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: isTop ? Colors.amber : Colors.grey[300],
+              color: rankColor.withOpacity(0.2),
               shape: BoxShape.circle,
+              border: Border.all(color: rankColor, width: 2),
             ),
             child: Text(
               '#$rank',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isTop ? Colors.white : Colors.black87,
+                color: rankColor == Colors.grey[300]
+                    ? Colors.black54
+                    : rankColor, // Darker text for visibility
               ),
             ),
           ),
           const SizedBox(width: 16),
           Text(
             name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
           ),
           const Spacer(),
           Text(
             '$score pts',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+            style: AppTheme.bodyLarge.copyWith(
+              color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -95,23 +126,44 @@ class CommunityScreen extends StatelessWidget {
   }
 
   Widget _buildGroupCard(BuildContext context, CommunityGroup group) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          child: const Icon(Icons.group, color: Colors.white),
-        ),
-        title: Text(group.name,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('${group.members} Members • ${group.description}'),
-        trailing: ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            minimumSize: const Size(60, 36),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          child: const Text('Join'),
+        ],
+        border: Border.all(color: AppColors.border),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 24,
+          backgroundColor: AppColors.secondary.withOpacity(0.1),
+          child: Icon(Icons.group, color: AppColors.secondary),
+        ),
+        title: Text(
+          group.name,
+          style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            '${group.members} Members • ${group.description}',
+            style: AppTheme.caption,
+          ),
+        ),
+        trailing: CustomButton(
+          text: 'Join',
+          onPressed: () {},
+          width: 70,
+          height: 36,
+          backgroundColor: AppColors.primary,
         ),
       ),
     );

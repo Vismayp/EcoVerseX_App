@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import '../config/theme.dart';
 
 class BeautifulTreeWidget extends StatefulWidget {
   final int streakCount;
@@ -50,19 +51,19 @@ class _BeautifulTreeWidgetState extends State<BeautifulTreeWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF87CEEB).withOpacity(0.3), // Sky blue
-                const Color(0xFFE1F5E1), // Light green
-                const Color(0xFFF1F8E9),
+                const Color(0xFFE0F7FA), // Light Cyan
+                AppColors.background,
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
             borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -77,7 +78,7 @@ class _BeautifulTreeWidgetState extends State<BeautifulTreeWidget>
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.amber.withOpacity(0.6),
+                    color: Colors.amber.withOpacity(0.8),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.amber.withOpacity(0.4),
@@ -152,7 +153,7 @@ class _BeautifulTreeWidgetState extends State<BeautifulTreeWidget>
                       'Your Tree is Growing!',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF2E7D32),
+                            color: AppColors.primary,
                           ),
                     ),
                     const SizedBox(height: 4),
