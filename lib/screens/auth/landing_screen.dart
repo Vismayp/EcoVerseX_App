@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import 'login_screen.dart';
@@ -272,7 +273,26 @@ class _WelcomeSlide extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(slide.imageUrl, fit: BoxFit.cover),
+                CachedNetworkImage(
+                  imageUrl: slide.imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppColors.surfaceDarker,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: AppColors.surfaceDarker,
+                    child: const Icon(
+                      Icons.error,
+                      color: AppColors.error,
+                    ),
+                  ),
+                ),
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(

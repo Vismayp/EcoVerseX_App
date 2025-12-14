@@ -222,11 +222,8 @@ class TreeCrownPainter extends CustomPainter {
       Offset(size.width * 0.5, size.height * 0.6),
       Offset(size.width * 0.3, size.height * 0.5),
       Offset(size.width * 0.7, size.height * 0.5),
-      Offset(size.width * 0.35, size.height * 0.7),
-      Offset(size.width * 0.65, size.height * 0.7),
-      Offset(size.width * 0.5, size.height * 0.4),
-      Offset(size.width * 0.4, size.height * 0.55),
-      Offset(size.width * 0.6, size.height * 0.55),
+      Offset(size.width * 0.4, size.height * 0.7),
+      Offset(size.width * 0.6, size.height * 0.7),
     ];
 
     final greenShades = [
@@ -235,9 +232,6 @@ class TreeCrownPainter extends CustomPainter {
       const Color(0xFF388E3C),
       const Color(0xFF43A047),
       const Color(0xFF4CAF50),
-      const Color(0xFF66BB6A),
-      const Color(0xFF81C784),
-      const Color(0xFFA5D6A7),
     ];
 
     // Add leaves with varying sizes and shades
