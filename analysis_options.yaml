@@ -1,0 +1,21 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Enable additional lint rules
+    always_declare_return_types: true
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    unnecessary_null_comparison: true
+    prefer_final_fields: true
+    avoid_print: true
+    # Additional rules can be added here
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    missing_return: error
+    missing_required_param: error
+    unconditional_import_of_deprecated_api_member: warning
