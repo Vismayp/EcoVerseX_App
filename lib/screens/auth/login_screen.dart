@@ -1,134 +1,331 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../../config/assets.dart';
-import '../../config/theme.dart';
-import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text_field.dart';
-import '../main_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+import '../../config/theme.dart';
+import '../main_screen.dart';
+import 'register_screen.dart';
+
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _showPassword = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      backgroundColor: AppColors.backgroundDark,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                'Welcome Back',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Sign in to continue your eco journey',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 40),
-              const CustomTextField(
-                label: 'Email',
-                hint: 'Enter your email',
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: Icons.email_outlined,
-              ),
-              const SizedBox(height: 24),
-              const CustomTextField(
-                label: 'Password',
-                hint: 'Enter your password',
-                isPassword: true,
-                prefixIcon: Icons.lock_outline,
-                suffixIcon: Icon(Icons.visibility_off_outlined, color: Colors.grey),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Log In',
+                    style: AppTheme.bodyLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
+                  const Spacer(),
+                  const SizedBox(width: 48),
+                ],
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: CustomButton(
-                  text: 'Login',
-                  onPressed: () {
-                    // Mock login
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MainScreen()),
-                      (route) => false,
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 40),
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey[300])),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'Or continue with',
-                      style: TextStyle(color: Colors.grey[500]),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        color: AppColors.surfaceDarker.withOpacity(0.70),
+                        border:
+                            Border.all(color: Colors.white.withOpacity(0.10)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primary.withOpacity(0.12),
+                              border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.35)),
+                            ),
+                            child: const Icon(Icons.eco, color: Colors.white),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome back',
+                                  style: AppTheme.bodyLarge.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Continue your eco journey.',
+                                  style: AppTheme.bodyMedium.copyWith(
+                                    color: Colors.white.withOpacity(0.65),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey[300])),
-                ],
+                    const SizedBox(height: 18),
+                    _AuthTextField(
+                      label: 'Email Address',
+                      hintText: 'you@example.com',
+                      icon: Icons.mail,
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 14),
+                    _AuthTextField(
+                      label: 'Password',
+                      hintText: '••••••••',
+                      icon: Icons.lock,
+                      controller: _passwordController,
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText: !_showPassword,
+                      trailing: IconButton(
+                        onPressed: () =>
+                            setState(() => _showPassword = !_showPassword),
+                        icon: Icon(
+                          _showPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.mutedOnDark,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Forgot password?',
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MainScreen()),
+                            (route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.backgroundDark,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Log In',
+                              style: AppTheme.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Icon(Icons.arrow_forward, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Expanded(
+                            child:
+                                Divider(color: Colors.white.withOpacity(0.10))),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'Or continue with',
+                            style: AppTheme.caption.copyWith(
+                              color: Colors.white.withOpacity(0.55),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                            child:
+                                Divider(color: Colors.white.withOpacity(0.10))),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side:
+                              BorderSide(color: Colors.white.withOpacity(0.12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.g_mobiledata,
+                                color: AppColors.primary, size: 30),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Continue with Google',
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const RegisterScreen()),
+                        );
+                      },
+                      child: Text(
+                        "Don't have an account? Create one",
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: Colors.white.withOpacity(0.75),
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _SocialButton(icon: Icons.g_mobiledata, onTap: () {}), // Placeholder for Google
-                  const SizedBox(width: 20),
-                  _SocialButton(icon: Icons.apple, onTap: () {}), // Placeholder for Apple
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SocialButton extends StatelessWidget {
+class _AuthTextField extends StatelessWidget {
+  final String label;
+  final String hintText;
   final IconData icon;
-  final VoidCallback onTap;
+  final TextEditingController controller;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final Widget? trailing;
 
-  const _SocialButton({required this.icon, required this.onTap});
+  const _AuthTextField({
+    required this.label,
+    required this.hintText,
+    required this.icon,
+    required this.controller,
+    required this.keyboardType,
+    this.obscureText = false,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTheme.caption.copyWith(
+            color: Colors.white.withOpacity(0.70),
+            fontWeight: FontWeight.w800,
+          ),
         ),
-        child: Icon(icon, size: 32, color: Colors.black87),
-      ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceInput,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withOpacity(0.10)),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 14),
+              Icon(icon, color: AppColors.mutedOnDark),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  obscureText: obscureText,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w600),
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    hintStyle: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(color: Colors.white.withOpacity(0.35)),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              if (trailing != null) trailing! else const SizedBox(width: 10),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

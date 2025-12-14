@@ -35,6 +35,8 @@ class EcoVerseXApp extends StatelessWidget {
     return MaterialApp(
       title: 'EcoVerseX',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
       home: const LandingScreen(),
       debugShowCheckedModeBanner: false,
     );

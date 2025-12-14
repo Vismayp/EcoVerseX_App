@@ -1,10 +1,14 @@
+import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
-import '../../widgets/stat_card.dart';
 import '../../widgets/beautiful_tree_widget.dart';
-import '../carbon/carbon_market_screen.dart';
-import '../tours/tours_screen.dart';
+import '../../widgets/neo/neo_card.dart';
+import '../../widgets/neo/neo_icon_button.dart';
+import '../../widgets/neo/neo_section_header.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -13,289 +17,221 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = MockData.currentUser;
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header removed as it is now in MainScreen AppBar
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hello, ${user.name.split(' ')[0]}! 👋',
-                  style: AppTheme.headlineMedium,
+    final firstName = user.name.trim().split(' ').isEmpty
+        ? user.name
+        : user.name.trim().split(' ').first;
+
+    return CustomScrollView(
+      slivers: [
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _DashboardHeaderDelegate(
+            minExtent: 84,
+            maxExtent: 84,
+            child: _BlurHeader(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                child: Row(
+                  children: [
+                    _AvatarWithStatus(
+                      imageUrl:
+                          'https://lh3.googleusercontent.com/aida-public/AB6AXuCviuQMguw4KYQ22oFiEDfLn_pX5PlLt3KCgO1Wlkd7H10jTkeqJjjVRQ0A3XEsAIFDsQ04WUNNfc2b9BiwLtXy6HU5B0h22S8c6KHBYM1xxqAJiH_S295STjiVUj5e3At5zpfKpUIy3uA__yy-mHHDEUFvEhU7lTvwc1jKn4qthzyS2ZqKh_jq0GbllEToGYyLqgbZ_JrlBaU2eNoUraGGIIfge2PW6aUJMtLrdF8pas9KxY2kJ5cgiqONFL7u4wajOprNxJmgTl0l',
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome back',
+                            style: AppTheme.caption.copyWith(
+                              color: AppColors.faintOnDark,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            firstName,
+                            style: AppTheme.headlineMedium.copyWith(
+                              color: AppColors.onDark,
+                              fontWeight: FontWeight.w800,
+                              height: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    NeoIconButton(
+                      tooltip: 'Notifications',
+                      icon: Icons.notifications,
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
-                Text(
-                  'Let\'s make an impact today',
-                  style: AppTheme.bodyMedium,
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+          sliver: SliverToBoxAdapter(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _StatTile(
+                    icon: Icons.local_fire_department,
+                    iconBg: Colors.orange.withOpacity(0.18),
+                    iconColor: Colors.orange,
+                    value: '${user.streakCount} Days',
+                    label: 'Streak',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatTile(
+                    icon: Icons.psychology,
+                    iconBg: AppColors.primary.withOpacity(0.18),
+                    iconColor: AppColors.primary,
+                    value: user.tier,
+                    label: 'Current Tier',
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // EcoCoins & Tier Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Total Balance',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${user.walletBalance}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Tier: ${user.tier}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.eco,
-                      color: AppColors.secondary,
-                      size: 32,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Tree Visualization
-            BeautifulTreeWidget(
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          sliver: SliverToBoxAdapter(
+            child: _HeroTreeCard(
               streakCount: user.streakCount,
               progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
             ),
-
-            const SizedBox(height: 24),
-
-            // Stats Grid
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.5,
-              children: [
-                StatCard(
-                  label: 'Carbon Saved',
-                  value: '${user.carbonSaved} kg',
-                  icon: Icons.cloud_off,
-                  color: Colors.blueGrey,
-                ),
-                StatCard(
-                  label: 'Water Saved',
-                  value: '${user.waterSaved} L',
-                  icon: Icons.water_drop,
-                  color: Colors.blue,
-                ),
-                StatCard(
-                  label: 'Waste Reduced',
-                  value: '${user.wasteReduced} kg',
-                  icon: Icons.delete_outline,
-                  color: Colors.brown,
-                ),
-                StatCard(
-                  label: 'Trees Planted',
-                  value:
-                      '${(user.carbonSaved / 22).toStringAsFixed(1)}', // Approx 22kg per tree
-                  icon: Icons.forest,
-                  color: AppColors.primary,
-                ),
-              ],
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+          sliver: SliverToBoxAdapter(
+            child: _WalletSection(balance: user.walletBalance),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverToBoxAdapter(
+            child: NeoSectionHeader(
+              title: 'Your Impact',
+              actionText: 'View History',
+              onAction: () {},
             ),
-
-            const SizedBox(height: 24),
-
-            // Quick Actions
-            Text(
-              'Explore',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(fontSize: 20),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: _ImpactGrid(
+              carbonSavedKg: user.carbonSaved,
+              waterSavedL: user.waterSaved,
+              wasteReducedKg: user.wasteReduced,
+              treesPlanted: user.carbonSaved / 22,
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildQuickActionCard(
-                    context,
-                    'AgriTours',
-                    Icons.agriculture,
-                    Colors.orange,
-                    () => Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const ToursScreen())),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildQuickActionCard(
-                    context,
-                    'Carbon Market',
-                    Icons.co2,
-                    Colors.teal,
-                    () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const CarbonMarketScreen())),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Recent Activity
-            Text(
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          sliver: SliverToBoxAdapter(
+            child: Text(
               'Recent Activity',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(fontSize: 20),
+              style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
             ),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: MockData.recentActivities.length,
-              itemBuilder: (context, index) {
-                final activity = MockData.recentActivities[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withOpacity(0.1),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+          sliver: SliverList.separated(
+            itemCount: MockData.recentActivities.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final activity = MockData.recentActivities[index];
+              final isApproved = activity.status.toLowerCase() == 'approved';
+
+              return NeoCard(
+                borderRadius: BorderRadius.circular(18),
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                       child: Icon(
                         _getActivityIcon(activity.category),
                         color: AppColors.primary,
                       ),
                     ),
-                    title: Text(activity.title,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(activity.date.toString().split(' ')[0]),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            activity.title,
+                            style: AppTheme.bodyLarge.copyWith(
+                              color: AppColors.onDark,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            activity.date.toString().split(' ').first,
+                            style: AppTheme.caption
+                                .copyWith(color: AppColors.mutedOnDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
                           '+${activity.coinReward} Coins',
-                          style: const TextStyle(
-                            color: Colors.amber,
-                            fontWeight: FontWeight.bold,
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                        Text(
-                          activity.status,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: activity.status == 'Approved'
-                                ? AppColors.primary
-                                : Colors.orange,
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isApproved
+                                ? AppColors.primary.withOpacity(0.14)
+                                : Colors.orange.withOpacity(0.16),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            activity.status,
+                            style: AppTheme.caption.copyWith(
+                              color: isApproved
+                                  ? AppColors.primary
+                                  : Colors.orange,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  ],
+                ),
+              );
+            },
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionCard(BuildContext context, String title,
-      IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 28, color: color),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
@@ -312,5 +248,483 @@ class DashboardScreen extends StatelessWidget {
       default:
         return Icons.eco;
     }
+  }
+}
+
+class _BlurHeader extends StatelessWidget {
+  const _BlurHeader({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.backgroundDark.withOpacity(0.92),
+            border: Border(
+              bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _DashboardHeaderDelegate({
+    required this.minExtent,
+    required this.maxExtent,
+    required this.child,
+  });
+
+  @override
+  final double minExtent;
+  @override
+  final double maxExtent;
+  final Widget child;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant _DashboardHeaderDelegate oldDelegate) {
+    return minExtent != oldDelegate.minExtent ||
+        maxExtent != oldDelegate.maxExtent ||
+        child != oldDelegate.child;
+  }
+}
+
+class _AvatarWithStatus extends StatelessWidget {
+  const _AvatarWithStatus({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  width: 44,
+                  height: 44,
+                  placeholder: (context, url) => Container(
+                    color: Colors.white.withOpacity(0.04),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.white.withOpacity(0.04),
+                    child:
+                        const Icon(Icons.person, color: AppColors.onDarkMuted),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: -1,
+            bottom: -1,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.backgroundDark, width: 2),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color iconBg;
+  final Color iconColor;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return NeoCard(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(22),
+      child: Column(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: AppTheme.headlineSmall.copyWith(
+              color: AppColors.onDark,
+              fontWeight: FontWeight.w800,
+              height: 1.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label.toUpperCase(),
+            style: AppTheme.caption.copyWith(
+              color: AppColors.faintOnDark,
+              letterSpacing: 0.8,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroTreeCard extends StatelessWidget {
+  const _HeroTreeCard({required this.streakCount, required this.progress});
+
+  final int streakCount;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return NeoCard(
+      borderRadius: BorderRadius.circular(28),
+      padding: EdgeInsets.zero,
+      child: AspectRatio(
+        aspectRatio: 4 / 5,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                color: AppColors.cardDark,
+                padding: const EdgeInsets.all(14),
+                child: BeautifulTreeWidget(
+                  streakCount: streakCount,
+                  progress: progress,
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      AppColors.backgroundDark.withOpacity(0.70),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 18,
+              right: 18,
+              bottom: 18,
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: Colors.white.withOpacity(0.10)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Tree is growing healthy',
+                        style: AppTheme.bodyMedium
+                            .copyWith(color: AppColors.onDarkMuted),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WalletSection extends StatelessWidget {
+  const _WalletSection({required this.balance});
+
+  final int balance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          '$balance EcoCoins',
+          style: AppTheme.displayLarge.copyWith(
+            color: AppColors.onDark,
+            fontWeight: FontWeight.w900,
+            height: 1.0,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Available balance to spend',
+          style: AppTheme.bodyMedium.copyWith(color: AppColors.faintOnDark),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withOpacity(0.06)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.redeem, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Redeem Rewards',
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ImpactGrid extends StatelessWidget {
+  const _ImpactGrid({
+    required this.carbonSavedKg,
+    required this.waterSavedL,
+    required this.wasteReducedKg,
+    required this.treesPlanted,
+  });
+
+  final double carbonSavedKg;
+  final double waterSavedL;
+  final double wasteReducedKg;
+  final double treesPlanted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        NeoCard(
+          borderRadius: BorderRadius.circular(22),
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CARBON SAVED',
+                      style: AppTheme.caption
+                          .copyWith(color: AppColors.faintOnDark),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          carbonSavedKg.toStringAsFixed(0),
+                          style: AppTheme.displayLarge.copyWith(
+                            color: AppColors.onDark,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 32,
+                            height: 1.0,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            'kg CO2e',
+                            style: AppTheme.bodyMedium
+                                .copyWith(color: AppColors.mutedOnDark),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.cloud_queue,
+                  color: AppColors.primary,
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _SmallImpactCard(
+                icon: Icons.water_drop,
+                iconColor: Colors.blue.shade300,
+                iconBg: Colors.blue.withOpacity(0.12),
+                value: '${waterSavedL.toStringAsFixed(0)}L',
+                label: 'WATER SAVED',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _SmallImpactCard(
+                icon: Icons.delete_outline,
+                iconColor: Colors.brown.shade300,
+                iconBg: Colors.brown.withOpacity(0.14),
+                value: '${wasteReducedKg.toStringAsFixed(0)}kg',
+                label: 'WASTE REDUCED',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _SmallImpactCard(
+                icon: Icons.forest,
+                iconColor: AppColors.primary,
+                iconBg: AppColors.primary.withOpacity(0.12),
+                value: treesPlanted.toStringAsFixed(1),
+                label: 'TREES PLANTED',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _SmallImpactCard(
+                icon: Icons.eco,
+                iconColor: AppColors.primary,
+                iconBg: AppColors.primary.withOpacity(0.10),
+                value: 'Live',
+                label: 'STATUS',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SmallImpactCard extends StatelessWidget {
+  const _SmallImpactCard({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBg;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return NeoCard(
+      borderRadius: BorderRadius.circular(22),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: AppTheme.headlineSmall.copyWith(
+              color: AppColors.onDark,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: AppTheme.caption.copyWith(color: AppColors.faintOnDark),
+          ),
+        ],
+      ),
+    );
   }
 }

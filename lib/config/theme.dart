@@ -3,183 +3,217 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF00695C); // Deep Emerald
-  static const Color primaryDark = Color(0xFF003D33);
-  static const Color primaryLight = Color(0xFF439889);
+  // Design tokens aligned with App.html (Tailwind config)
+  static const Color primary = Color(0xFF13EC13);
 
-  static const Color secondary = Color(0xFFAEEA00); // Vibrant Lime
-  static const Color secondaryDark = Color(0xFF79B700);
+  static const Color backgroundLight = Color(0xFFF6F8F6);
+  static const Color backgroundDark = Color(0xFF102210);
+  static const Color cardDark = Color(0xFF162B16);
+  static const Color surfaceDarker = Color(0xFF0D1B0D);
+  static const Color surfaceInput = Color(0xFF283928);
 
-  static const Color background = Color(0xFFF5F9F6); // Soft Mint Grey
+  // Back-compat names used across the codebase
+  static const Color secondary = primary;
+  static const Color background = backgroundLight;
   static const Color surface = Colors.white;
+
   static const Color error = Color(0xFFD32F2F);
 
-  static const Color textPrimary = Color(0xFF1A1C1E);
-  static const Color textSecondary = Color(0xFF424242);
-  static const Color textLight = Color(0xFF757575);
+  static const Color textPrimary = Color(0xFF0B130B);
+  static const Color textSecondary = Color(0xFF355135);
+  static const Color textLight = Color(0xFF6C7D6C);
 
-  static const Color accent = Color(0xFFFFD700); // Gold/Amber
-  static const Color border = Color(0xFFE0E0E0);
+  static const Color accent = Color(0xFFFFD700);
+  static const Color border = Color(0x1AFFFFFF);
+
+  static const Color onDark = Colors.white;
+  static const Color onDarkMuted = Color(0xA6FFFFFF);
+  static const Color onDarkFaint = Color(0x66FFFFFF);
+
+  // Aliases for readability in new Neo widgets
+  static const Color mutedOnDark = onDarkMuted;
+  static const Color faintOnDark = onDarkFaint;
 }
 
 class AppTheme {
-  static TextStyle get displayLarge => GoogleFonts.poppins(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
+  static TextStyle get displayLarge => GoogleFonts.plusJakartaSans(
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
       );
 
-  static TextStyle get headlineMedium => GoogleFonts.poppins(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      );
-
-  static TextStyle get headlineSmall => GoogleFonts.poppins(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      );
-
-  static TextStyle get bodyLarge => GoogleFonts.inter(
-        fontSize: 16,
-        color: AppColors.textSecondary,
-      );
-
-  static TextStyle get bodyMedium => GoogleFonts.inter(
-        fontSize: 14,
-        color: AppColors.textSecondary,
-      );
-
-  static TextStyle get caption => GoogleFonts.inter(
-        fontSize: 12,
-        color: AppColors.textLight,
-      );
-
-  static final ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    scaffoldBackgroundColor: AppColors.background,
-    colorScheme: const ColorScheme(
-      brightness: Brightness.light,
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      onSecondary: Colors.black,
-      error: AppColors.error,
-      onError: Colors.white,
-      background: AppColors.background,
-      onBackground: AppColors.textPrimary,
-      surface: AppColors.surface,
-      onSurface: AppColors.textPrimary,
-    ),
-    textTheme: TextTheme(
-      displayLarge: GoogleFonts.poppins(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
-      displayMedium: GoogleFonts.poppins(
+  static TextStyle get displaySmall => GoogleFonts.plusJakartaSans(
         fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
-      displaySmall: GoogleFonts.poppins(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
-      headlineMedium: GoogleFonts.poppins(
+        fontWeight: FontWeight.w800,
+      );
+
+  static TextStyle get headlineMedium => GoogleFonts.plusJakartaSans(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-      bodyLarge: GoogleFonts.inter(
+        fontWeight: FontWeight.w700,
+      );
+
+  static TextStyle get headlineSmall => GoogleFonts.plusJakartaSans(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+      );
+
+  static TextStyle get bodyLarge => GoogleFonts.plusJakartaSans(
         fontSize: 16,
-        color: AppColors.textSecondary,
-      ),
-      bodyMedium: GoogleFonts.inter(
+        fontWeight: FontWeight.w500,
+      );
+
+  static TextStyle get bodyMedium => GoogleFonts.plusJakartaSans(
         fontSize: 14,
-        color: AppColors.textSecondary,
-      ),
-      labelLarge: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
-      titleTextStyle: GoogleFonts.poppins(
-        color: AppColors.textPrimary,
-        fontSize: 20,
+        fontWeight: FontWeight.w500,
+      );
+
+  static TextStyle get caption => GoogleFonts.plusJakartaSans(
+        fontSize: 12,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.2,
+      );
+
+  static ThemeData get lightTheme {
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.backgroundLight,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.light,
+        background: AppColors.backgroundLight,
+      ).copyWith(
+        primary: AppColors.primary,
+        secondary: AppColors.primary,
+        error: AppColors.error,
+        surface: Colors.white,
       ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+    );
+
+    return base.copyWith(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme).copyWith(
+        displayLarge: displayLarge.copyWith(color: AppColors.textPrimary),
+        displaySmall: displaySmall.copyWith(color: AppColors.textPrimary),
+        headlineMedium: headlineMedium.copyWith(color: AppColors.textPrimary),
+        headlineSmall: headlineSmall.copyWith(color: AppColors.textPrimary),
+        bodyLarge: bodyLarge.copyWith(color: AppColors.textSecondary),
+        bodyMedium: bodyMedium.copyWith(color: AppColors.textSecondary),
+        labelLarge: GoogleFonts.plusJakartaSans(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        titleTextStyle: headlineMedium.copyWith(color: AppColors.textPrimary),
+      ),
+      cardTheme: CardTheme(
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.black.withOpacity(0.06)),
         ),
-        textStyle: GoogleFonts.poppins(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+        color: Colors.white,
+        margin: const EdgeInsets.only(bottom: 16),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.black.withOpacity(0.08)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.black.withOpacity(0.08)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        labelStyle: GoogleFonts.plusJakartaSans(color: AppColors.textLight),
+        hintStyle:
+            GoogleFonts.plusJakartaSans(color: Colors.black.withOpacity(0.45)),
+      ),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.backgroundDark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.dark,
+        background: AppColors.backgroundDark,
+      ).copyWith(
+        primary: AppColors.primary,
+        secondary: AppColors.primary,
+        surface: AppColors.cardDark,
+        error: AppColors.error,
+      ),
+    );
+
+    return base.copyWith(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme).copyWith(
+        displayLarge: displayLarge.copyWith(color: AppColors.onDark),
+        displaySmall: displaySmall.copyWith(color: AppColors.onDark),
+        headlineMedium: headlineMedium.copyWith(color: AppColors.onDark),
+        headlineSmall: headlineSmall.copyWith(color: AppColors.onDark),
+        bodyLarge: bodyLarge.copyWith(color: AppColors.onDarkMuted),
+        bodyMedium: bodyMedium.copyWith(color: AppColors.onDarkMuted),
+        labelLarge: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: AppColors.onDark,
         ),
       ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        titleTextStyle: headlineMedium.copyWith(color: AppColors.onDark),
+      ),
+      cardTheme: CardTheme(
+        elevation: 0,
+        color: AppColors.cardDark,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.white.withOpacity(0.06)),
         ),
-        textStyle: GoogleFonts.poppins(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+        margin: const EdgeInsets.only(bottom: 16),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.06),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        labelStyle:
+            GoogleFonts.plusJakartaSans(color: Colors.white.withOpacity(0.55)),
+        hintStyle:
+            GoogleFonts.plusJakartaSans(color: Colors.white.withOpacity(0.40)),
       ),
-    ),
-    cardTheme: CardTheme(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: Colors.grey.withOpacity(0.1)),
-      ),
-      color: Colors.white,
-      margin: const EdgeInsets.only(bottom: 16),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.error),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      labelStyle: GoogleFonts.inter(color: AppColors.textLight),
-      hintStyle: GoogleFonts.inter(color: Colors.grey[400]),
-    ),
-  );
+    );
+  }
 }
