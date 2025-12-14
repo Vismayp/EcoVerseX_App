@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/mock_data.dart';
 import '../../widgets/stat_card.dart';
+import '../../widgets/beautiful_tree_widget.dart';
 import '../carbon/carbon_market_screen.dart';
 import '../tours/tours_screen.dart';
 
@@ -40,23 +41,61 @@ class DashboardScreen extends StatelessWidget {
               ),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.amber[100],
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.amber),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF2E7D32), // Dark green
+                      const Color(0xFF388E3C), // Medium green
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2E7D32).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.monetization_on,
-                        color: Colors.amber, size: 20),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${user.walletBalance}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.brown,
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
                       ),
+                      child: const Icon(
+                        Icons.eco,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'EcoCoins',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          '${user.walletBalance}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -66,43 +105,10 @@ class DashboardScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Tree Visualization (Placeholder)
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primaryContainer,
-                  Colors.white,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.park, // Tree icon
-                  size: 100,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Your Tree is Growing!',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                Text(
-                  '${user.streakCount} Day Streak 🔥',
-                  style: TextStyle(
-                      color: Colors.orange[800], fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+          // Tree Visualization
+          BeautifulTreeWidget(
+            streakCount: user.streakCount,
+            progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
           ),
 
           const SizedBox(height: 24),

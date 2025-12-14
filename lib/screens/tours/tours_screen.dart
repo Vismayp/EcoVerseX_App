@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../widgets/app_logo.dart';
 
 class ToursScreen extends StatelessWidget {
   const ToursScreen({super.key});
@@ -11,7 +12,13 @@ class ToursScreen extends StatelessWidget {
     final tours = MockData.tours;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('AgriTours')),
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: AppLogo(),
+        ),
+        title: const Text('AgriTours'),
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: tours.length,

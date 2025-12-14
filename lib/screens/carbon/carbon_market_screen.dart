@@ -3,6 +3,7 @@ import '../../data/mock_data.dart';
 import '../../data/models.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/app_logo.dart';
 
 class CarbonMarketScreen extends StatefulWidget {
   const CarbonMarketScreen({super.key});
@@ -41,6 +42,10 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: AppLogo(),
+        ),
         title: const Text('Carbon Market'),
         bottom: TabBar(
           controller: _tabController,
