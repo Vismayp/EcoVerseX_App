@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
-import '../../widgets/beautiful_tree_widget.dart';
+import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_icon_button.dart';
 import '../../widgets/neo/neo_section_header.dart';
+import '../carbon/carbon_market_screen.dart';
+import '../tours/tours_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -134,6 +136,55 @@ class DashboardScreen extends StatelessWidget {
               waterSavedL: user.waterSaved,
               wasteReducedKg: user.wasteReduced,
               treesPlanted: user.carbonSaved / 22,
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Explore',
+                  style:
+                      AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ExploreCard(
+                        title: 'AgriTours',
+                        icon: Icons.agriculture,
+                        color: Colors.orange,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ToursScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _ExploreCard(
+                        title: 'Carbon Market',
+                        icon: Icons.co2,
+                        color: AppColors.primary,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const CarbonMarketScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -426,6 +477,9 @@ class _HeroTreeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const imageUrl =
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuCuBOfKHZynUenR14Ew57HORM-7v5aGHHbuAdeP3YrmY3Dn4G2mx9CqRDVdr4woaPjPknfhz2haGv2TfGTq94C2w1Ays1U0-9IhzvmhVUb0FzpRCPcJrnmpt42WJ3UqkGt-LCKPORvpSs-WnQDPQYLiXoyEjaYinLsHnNQ293Cy3KED7iVklPxyOE9rmriWtMV7sPv6_-Wpmb7gAMVy-m3vLwgqWaYmFL-2Ew-Q0gOAOVlhrOfXeifND1SKwkyawKc7P40hDL6Sf36l';
+
     return NeoCard(
       borderRadius: BorderRadius.circular(28),
       padding: EdgeInsets.zero,
@@ -434,26 +488,65 @@ class _HeroTreeCard extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: Container(
-                color: AppColors.cardDark,
-                padding: const EdgeInsets.all(14),
-                child: BeautifulTreeWidget(
-                  streakCount: streakCount,
-                  progress: progress,
-                ),
-              ),
-            ),
-            Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      AppColors.backgroundDark.withOpacity(0.70),
-                      Colors.transparent,
-                    ],
-                  ),
+                  color: AppColors.cardDark,
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        memCacheHeight: 1200,
+                        placeholder: (context, url) => Container(
+                          color: Colors.white.withOpacity(0.04),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.white.withOpacity(0.04),
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            color: AppColors.onDarkMuted,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 140,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.primary.withOpacity(0.10),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              AppColors.backgroundDark,
+                              Color(0x33000000),
+                              Colors.transparent,
+                            ],
+                            stops: [0.0, 0.45, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -508,14 +601,20 @@ class _WalletSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          '$balance EcoCoins',
-          style: AppTheme.displayLarge.copyWith(
-            color: AppColors.onDark,
-            fontWeight: FontWeight.w900,
-            height: 1.0,
-          ),
-          textAlign: TextAlign.center,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const EcoCoinIcon(size: 22),
+            const SizedBox(width: 10),
+            Text(
+              '$balance EcoCoins',
+              style: AppTheme.displayLarge.copyWith(
+                color: AppColors.onDark,
+                fontWeight: FontWeight.w900,
+                height: 1.0,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(
@@ -724,6 +823,49 @@ class _SmallImpactCard extends StatelessWidget {
             style: AppTheme.caption.copyWith(color: AppColors.faintOnDark),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ExploreCard extends StatelessWidget {
+  const _ExploreCard({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return NeoCard(
+      borderRadius: BorderRadius.circular(22),
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 32),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: AppTheme.bodyMedium.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

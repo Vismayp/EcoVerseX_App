@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
+import '../../data/models.dart';
+import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_primary_button.dart';
@@ -25,6 +28,29 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
   String _query = '';
   String _selectedChip = 'Transport';
   _ActionSuggestion? _selectedAction;
+
+  Future<Position?> _tryGetLivePosition() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return null;
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return null;
+      }
+
+      return Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 6),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -169,8 +195,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.monetization_on,
-                              size: 18, color: AppColors.primary),
+                          const EcoCoinIcon(size: 18),
                           const SizedBox(width: 6),
                           Text(
                             '${user.walletBalance}',
@@ -197,7 +222,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
                         children: [
                           NeoSearchField(
                             hintText: 'Search actions (e.g., vegan, bike)',
-                            trailingIcon: Icons.qr_code_scanner,
+                            trailingIcon: Icons.add,
                             onTrailingTap: () {},
                             onChanged: (v) =>
                                 setState(() => _query = v.trim().toLowerCase()),
@@ -389,7 +414,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
                 child: NeoPrimaryButton(
                   label: _stepIndex == 0 ? 'Continue' : 'Submit for Review',
                   icon: _stepIndex == 0 ? Icons.arrow_forward : Icons.check,
-                  onPressed: () {
+                  onPressed: () async {
                     if (_stepIndex == 0) {
                       if (_selectedAction == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -401,6 +426,24 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
                       }
                       setState(() => _stepIndex = 1);
                       return;
+                    }
+
+                    final action = _selectedAction;
+                    final position = await _tryGetLivePosition();
+                    if (action != null) {
+                      MockData.recentActivities.insert(
+                        0,
+                        Activity(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          title: action.title,
+                          category: action.category,
+                          coinReward: action.reward,
+                          date: DateTime.now(),
+                          status: 'Pending',
+                          latitude: position?.latitude,
+                          longitude: position?.longitude,
+                        ),
+                      );
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(

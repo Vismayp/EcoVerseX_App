@@ -29,6 +29,8 @@ class Activity {
   final int coinReward;
   final DateTime date;
   final String status; // Pending, Approved, Rejected
+  final double? latitude;
+  final double? longitude;
 
   Activity({
     required this.id,
@@ -37,6 +39,8 @@ class Activity {
     required this.coinReward,
     required this.date,
     required this.status,
+    this.latitude,
+    this.longitude,
   });
 }
 

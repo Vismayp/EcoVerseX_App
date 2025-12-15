@@ -56,8 +56,14 @@ class _AmbientGlowBackground extends StatelessWidget {
               width: 320,
               height: 220,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.18),
-                borderRadius: BorderRadius.circular(220),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.18),
+                    blurRadius: 120,
+                    spreadRadius: 40,
+                  ),
+                ],
               ),
             ),
           ),
@@ -68,26 +74,19 @@ class _AmbientGlowBackground extends StatelessWidget {
               width: 320,
               height: 240,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.10),
-                borderRadius: BorderRadius.circular(240),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.10),
+                    blurRadius: 120,
+                    spreadRadius: 40,
+                  ),
+                ],
               ),
             ),
           ),
-          const _BlurLayer(),
         ],
       ),
-    );
-  }
-}
-
-class _BlurLayer extends StatelessWidget {
-  const _BlurLayer();
-
-  @override
-  Widget build(BuildContext context) {
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 48, sigmaY: 48),
-      child: const SizedBox.expand(),
     );
   }
 }

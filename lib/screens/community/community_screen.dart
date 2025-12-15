@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
+import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_section_header.dart';
 
@@ -108,21 +109,6 @@ class CommunityScreen extends StatelessWidget {
             ),
           ],
         ),
-        Positioned(
-          right: 16,
-          bottom: 96,
-          child: SizedBox(
-            height: 56,
-            width: 56,
-            child: FloatingActionButton(
-              onPressed: () {},
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.backgroundDark,
-              elevation: 0,
-              child: const Icon(Icons.person_add, size: 28),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -165,7 +151,7 @@ class _BlurHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.backgroundDark.withOpacity(0.86),
@@ -243,7 +229,7 @@ class _BalancePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.eco, size: 20, color: AppColors.primary),
+          const EcoCoinIcon(size: 20),
           const SizedBox(width: 8),
           Text(
             '$balance',

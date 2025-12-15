@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_primary_button.dart';
@@ -168,7 +169,7 @@ class _BlurHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.surfaceDarker.withOpacity(0.80),
@@ -200,22 +201,13 @@ class _BalancePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.savings, size: 18, color: AppColors.primary),
+          const EcoCoinIcon(size: 18),
           const SizedBox(width: 8),
           Text(
             '$balance',
             style: AppTheme.bodyMedium.copyWith(
               color: AppColors.onDark,
               fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'ECO',
-            style: AppTheme.caption.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.7,
             ),
           ),
         ],

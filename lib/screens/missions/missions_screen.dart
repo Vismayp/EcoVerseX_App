@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
+import 'mission_detail_screen.dart';
 
 class MissionsScreen extends StatelessWidget {
   const MissionsScreen({super.key});
@@ -200,7 +202,7 @@ class _BlurHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.backgroundDark.withOpacity(0.92),
@@ -261,11 +263,10 @@ class _WalletPill extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.account_balance_wallet,
-              size: 18, color: AppColors.primary),
+          const EcoCoinIcon(size: 18),
           const SizedBox(width: 6),
           Text(
-            '$value ₵',
+            value.toString(),
             style: AppTheme.bodyMedium.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w900,
@@ -301,22 +302,29 @@ class _ActiveMissionCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.white.withOpacity(0.04),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.white.withOpacity(0.04),
-                        child: const Icon(Icons.image_not_supported,
-                            color: AppColors.onDarkMuted),
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(18)),
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        memCacheHeight: 600,
+                        placeholder: (context, url) => Container(
+                          color: Colors.white.withOpacity(0.04),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.white.withOpacity(0.04),
+                          child: const Icon(Icons.image_not_supported,
+                              color: AppColors.onDarkMuted),
+                        ),
                       ),
                     ),
                   ),
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(18)),
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
@@ -360,7 +368,7 @@ class _ActiveMissionCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -381,7 +389,7 @@ class _ActiveMissionCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
                             Text(
                               mission.description,
                               style: AppTheme.caption.copyWith(
@@ -403,10 +411,12 @@ class _ActiveMissionCard extends StatelessWidget {
                             style: AppTheme.caption
                                 .copyWith(color: AppColors.faintOnDark),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${mission.reward} ₵',
-                            style: AppTheme.bodyMedium.copyWith(
+                          const SizedBox(height: 4),
+                          EcoCoinAmount(
+                            amount: mission.reward.toString(),
+                            iconSize: 18,
+                            gap: 6,
+                            textStyle: AppTheme.bodyMedium.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w900,
                             ),
@@ -415,7 +425,7 @@ class _ActiveMissionCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -435,30 +445,36 @@ class _ActiveMissionCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: LinearProgressIndicator(
                       value: mission.progress,
-                      minHeight: 8,
+                      minHeight: 10,
                       backgroundColor: Colors.white.withOpacity(0.10),
                       color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
-                    height: 40,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Log Today\'s Progress',
+                        style: AppTheme.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      child: const Text('Log Today\'s Progress'),
                     ),
                   ),
                 ],
@@ -486,134 +502,124 @@ class _AvailableMissionCard extends StatelessWidget {
 
     return NeoCard(
       borderRadius: BorderRadius.circular(16),
-      padding: const EdgeInsets.all(14),
-      child: Stack(
-        children: [
-          if (badge != null)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: badge.color.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: badge.color.withOpacity(0.30)),
-                ),
-                child: Text(
-                  badge.label.toUpperCase(),
-                  style: AppTheme.caption.copyWith(
-                    color: badge.color,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.7,
-                  ),
-                ),
-              ),
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MissionDetailScreen(mission: mission),
             ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  width: 84,
-                  height: 84,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    width: 84,
-                    height: 84,
-                    color: Colors.white.withOpacity(0.04),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    width: 84,
-                    height: 84,
-                    color: Colors.white.withOpacity(0.04),
-                    child: const Icon(Icons.image_not_supported,
-                        color: AppColors.onDarkMuted),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 82),
-                      child: Text(
-                        mission.title,
-                        style: AppTheme.bodyLarge.copyWith(
-                          color: AppColors.onDark,
-                          fontWeight: FontWeight.w900,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              if (badge != null)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: badge.color.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: badge.color.withOpacity(0.30)),
+                    ),
+                    child: Text(
+                      badge.label.toUpperCase(),
+                      style: AppTheme.caption.copyWith(
+                        color: badge.color,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.7,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      mission.description,
-                      style: AppTheme.bodyMedium
-                          .copyWith(color: AppColors.mutedOnDark),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      width: 84,
+                      height: 84,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 200,
+                      memCacheHeight: 200,
+                      placeholder: (context, url) => Container(
+                        width: 84,
+                        height: 84,
+                        color: Colors.white.withOpacity(0.04),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 84,
+                        height: 84,
+                        color: Colors.white.withOpacity(0.04),
+                        child: const Icon(Icons.image_not_supported,
+                            color: AppColors.onDarkMuted),
+                      ),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.schedule,
-                            size: 16, color: AppColors.onDarkFaint),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${mission.durationDays} Day${mission.durationDays == 1 ? '' : 's'}',
-                          style: AppTheme.caption
-                              .copyWith(color: AppColors.mutedOnDark),
-                        ),
-                        const SizedBox(width: 14),
-                        Icon(Icons.monetization_on,
-                            size: 16, color: AppColors.primary),
-                        const SizedBox(width: 4),
-                        Text(
-                          '+${mission.reward} EcoCoins',
-                          style: AppTheme.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w900,
+                        Padding(
+                          padding: const EdgeInsets.only(right: 82),
+                          child: Text(
+                            mission.title,
+                            style: AppTheme.bodyLarge.copyWith(
+                              color: AppColors.onDark,
+                              fontWeight: FontWeight.w900,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          mission.description,
+                          style: AppTheme.bodyMedium
+                              .copyWith(color: AppColors.mutedOnDark),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Icon(Icons.schedule,
+                                size: 16, color: AppColors.onDarkFaint),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${mission.durationDays} Day${mission.durationDays == 1 ? '' : 's'}',
+                              style: AppTheme.caption
+                                  .copyWith(color: AppColors.mutedOnDark),
+                            ),
+                            const SizedBox(width: 14),
+                            EcoCoinAmount(
+                              amount: '+${mission.reward}',
+                              iconSize: 16,
+                              gap: 6,
+                              textStyle: AppTheme.caption.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: (index % 2 == 0)
-                        ? AppColors.primary
-                        : Colors.white.withOpacity(0.06),
-                    foregroundColor:
-                        (index % 2 == 0) ? Colors.black : AppColors.onDark,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: (index % 2 == 0)
-                            ? Colors.transparent
-                            : Colors.white.withOpacity(0.10),
-                      ),
-                    ),
                   ),
-                  child: const Text('Join'),
-                ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

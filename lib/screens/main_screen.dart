@@ -39,6 +39,16 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return NeoScaffold(
       body: IndexedStack(index: _selectedIndex, children: _screens),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openActivityLog,
+        backgroundColor: AppColors.primary,
+        elevation: 8,
+        shape: const CircleBorder(
+          side: BorderSide(color: AppColors.backgroundDark, width: 4),
+        ),
+        child: const Icon(Icons.add, color: AppColors.backgroundDark, size: 28),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: NeoBottomNavBar(
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),

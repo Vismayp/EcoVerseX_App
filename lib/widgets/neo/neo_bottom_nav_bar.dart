@@ -22,7 +22,7 @@ class NeoBottomNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     required this.onCenterTap,
-    this.centerIcon = Icons.qr_code_scanner,
+    this.centerIcon = Icons.add,
   });
 
   final List<NeoBottomNavItem> items;
@@ -76,51 +76,7 @@ class NeoBottomNavBar extends StatelessWidget {
             children: [
               buildItem(0, items[0]),
               buildItem(1, items[1]),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Transform.translate(
-                        offset: const Offset(0, -18),
-                        child: InkWell(
-                          onTap: onCenterTap,
-                          borderRadius: BorderRadius.circular(999),
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.35),
-                                  blurRadius: 22,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                              border: Border.all(
-                                color: AppColors.backgroundDark,
-                                width: 4,
-                              ),
-                            ),
-                            child: Icon(centerIcon,
-                                color: AppColors.backgroundDark, size: 28),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Scan',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(color: AppColors.mutedOnDark),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const Spacer(),
               buildItem(2, items[2]),
               buildItem(3, items[3]),
             ],

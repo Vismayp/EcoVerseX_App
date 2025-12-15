@@ -24,17 +24,14 @@ class NeoCard extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: cardColor.withOpacity(0.92),
-            borderRadius: borderRadius,
-            border: Border.all(color: Colors.white.withOpacity(0.06)),
-          ),
-          child: child,
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: cardColor.withOpacity(0.92),
+          borderRadius: borderRadius,
+          border: Border.all(color: Colors.white.withOpacity(0.06)),
         ),
+        child: child,
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_search_field.dart';
@@ -331,7 +332,7 @@ class _BalanceCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
                       children: [
-                        Icon(Icons.eco, size: 20, color: AppColors.primary),
+                        const EcoCoinIcon(size: 20),
                         const SizedBox(width: 6),
                         Text(
                           'EcoCoins',
