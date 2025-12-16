@@ -45,6 +45,9 @@ class _MissionsBodyState extends State<_MissionsBody> {
     final activeMissions = missions.where((m) => m.isJoined).toList();
     final availableMissions = missions.where((m) => !m.isJoined).toList();
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final sidePadding = (screenWidth - (screenWidth * 0.82)) / 2;
+
     return CustomScrollView(
       slivers: [
         SliverPersistentHeader(
@@ -128,9 +131,9 @@ class _MissionsBodyState extends State<_MissionsBody> {
         ),
         SliverToBoxAdapter(
           child: SizedBox(
-            height: 310,
+            height: 400,
             child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+              padding: EdgeInsets.fromLTRB(sidePadding, 4, sidePadding, 6),
               scrollDirection: Axis.horizontal,
               itemCount: activeMissions.isEmpty ? 1 : activeMissions.length,
               separatorBuilder: (context, index) => const SizedBox(width: 14),
