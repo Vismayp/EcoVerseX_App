@@ -10,6 +10,7 @@ import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_primary_button.dart';
+import '../../widgets/neo/neo_scaffold.dart';
 import '../../widgets/neo/neo_search_field.dart';
 import '../../widgets/neo/neo_section_header.dart';
 
@@ -71,140 +72,142 @@ class _ToursScreenState extends State<ToursScreen> {
     final featured =
         tours.where((t) => t.rating >= 4.8).take(2).toList(growable: false);
 
-    return CustomScrollView(
-      slivers: [
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _PinnedHeaderDelegate(
-            minExtent: 150,
-            maxExtent: 150,
-            child: _BlurHeader(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Explore',
-                              style: AppTheme.caption.copyWith(
-                                color: AppColors.mutedOnDark,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
+    return NeoScaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _PinnedHeaderDelegate(
+              minExtent: 150,
+              maxExtent: 150,
+              child: _BlurHeader(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Explore',
+                                style: AppTheme.caption.copyWith(
+                                  color: AppColors.mutedOnDark,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Text(
-                                  'AgriTours',
-                                  style: AppTheme.headlineSmall.copyWith(
-                                    color: AppColors.onDark,
-                                    fontWeight: FontWeight.w900,
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    'AgriTours',
+                                    style: AppTheme.headlineSmall.copyWith(
+                                      color: AppColors.onDark,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Icon(
-                                  Icons.expand_more,
-                                  color: AppColors.primary,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        _BalancePill(balance: user.walletBalance),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    NeoSearchField(
-                      controller: _searchController,
-                      hintText: 'Search farms, workshops in Karnataka...',
-                      trailingIcon: Icons.tune,
-                      onChanged: (_) => setState(() {}),
-                      onTrailingTap: () {},
-                    ),
-                  ],
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.expand_more,
+                                    color: AppColors.primary,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          _WalletPill(value: user.walletBalance),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      NeoSearchField(
+                        controller: _searchController,
+                        hintText: 'Search farms, workshops in Karnataka...',
+                        trailingIcon: Icons.tune,
+                        onChanged: (_) => setState(() {}),
+                        onTrailingTap: () {},
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: SizedBox(
-            height: 64,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-              itemCount: _filters.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 64,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                itemCount: _filters.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  final filter = _filters[index];
+                  return NeoChip(
+                    label: filter.label,
+                    icon: filter.icon,
+                    selected: index == _selectedFilter,
+                    onTap: () => setState(() => _selectedFilter = index),
+                  );
+                },
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+              child: NeoSectionHeader(
+                title: 'Trending Experiences',
+                actionText: 'See all',
+                onAction: () {},
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 200,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                itemCount: featured.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 14),
+                itemBuilder: (context, index) {
+                  final tour = featured[index];
+                  final badge = index == 0 ? '🔥 Trending' : '⭐ Top Rated';
+                  return _FeaturedTourCard(tour: tour, badge: badge);
+                },
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+              child: Text(
+                'All Tours in Karnataka',
+                style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+            sliver: SliverList.separated(
+              itemCount: filteredTours.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
-                final filter = _filters[index];
-                return NeoChip(
-                  label: filter.label,
-                  icon: filter.icon,
-                  selected: index == _selectedFilter,
-                  onTap: () => setState(() => _selectedFilter = index),
+                final tour = filteredTours[index];
+                return _TourListCard(
+                  tour: tour,
+                  showPrimaryCta: index == 0,
+                  carbonSavedKg: _estimateCarbonSavedKg(tour),
                 );
               },
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-            child: NeoSectionHeader(
-              title: 'Trending Experiences',
-              actionText: 'See all',
-              onAction: () {},
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: SizedBox(
-            height: 200,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-              itemCount: featured.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 14),
-              itemBuilder: (context, index) {
-                final tour = featured[index];
-                final badge = index == 0 ? '🔥 Trending' : '⭐ Top Rated';
-                return _FeaturedTourCard(tour: tour, badge: badge);
-              },
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-            child: Text(
-              'All Tours in Karnataka',
-              style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
-          sliver: SliverList.separated(
-            itemCount: filteredTours.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final tour = filteredTours[index];
-              return _TourListCard(
-                tour: tour,
-                showPrimaryCta: index == 0,
-                carbonSavedKg: _estimateCarbonSavedKg(tour),
-              );
-            },
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -252,53 +255,53 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class _BlurHeader extends StatelessWidget {
-  final Widget child;
-
   const _BlurHeader({required this.child});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.surfaceDarker.withOpacity(0.80),
+            color: AppColors.backgroundDark.withOpacity(0.92),
             border: Border(
               bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
             ),
           ),
-          child: SafeArea(bottom: false, child: child),
+          child: child,
         ),
       ),
     );
   }
 }
 
-class _BalancePill extends StatelessWidget {
-  final int balance;
+class _WalletPill extends StatelessWidget {
+  const _WalletPill({required this.value});
 
-  const _BalancePill({required this.balance});
+  final int value;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.14),
+        color: Colors.white.withOpacity(0.06),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withOpacity(0.24)),
+        border: Border.all(color: Colors.white.withOpacity(0.10)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           const EcoCoinIcon(size: 18),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Text(
-            '$balance',
+            value.toString(),
             style: AppTheme.bodyMedium.copyWith(
-              color: AppColors.onDark,
-              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
