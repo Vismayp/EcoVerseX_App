@@ -71,8 +71,8 @@ class AuthService {
         print('Backend sync failed: $e');
       }
       return userCredential;
-    } catch (e) {
-      throw Exception('Google sign in failed: $e');
+    } catch (e, st) {
+      throw Exception('Google sign in failed: $e\n$st');
     }
   }
 
