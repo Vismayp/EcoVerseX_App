@@ -8,6 +8,7 @@ class User {
   final double carbonSaved;
   final double waterSaved;
   final double wasteReduced;
+  final int treesPlanted;
 
   User({
     required this.id,
@@ -19,6 +20,7 @@ class User {
     required this.carbonSaved,
     required this.waterSaved,
     required this.wasteReduced,
+    required this.treesPlanted,
   });
 }
 
@@ -31,6 +33,9 @@ class Activity {
   final String status; // Pending, Approved, Rejected
   final double? latitude;
   final double? longitude;
+  final double? co2Saved;
+  final double? waterSaved;
+  final int? treesPlanted;
 
   Activity({
     required this.id,
@@ -41,6 +46,9 @@ class Activity {
     required this.status,
     this.latitude,
     this.longitude,
+    this.co2Saved,
+    this.waterSaved,
+    this.treesPlanted,
   });
 }
 

@@ -11,6 +11,7 @@ class MockData {
     carbonSaved: 45.5,
     waterSaved: 120.0,
     wasteReduced: 15.2,
+    treesPlanted: 2,
   );
 
   static final List<Activity> recentActivities = [
@@ -21,6 +22,8 @@ class MockData {
       coinReward: 50,
       date: DateTime.now().subtract(const Duration(hours: 2)),
       status: 'Approved',
+      co2Saved: 2.5,
+      waterSaved: 0.0,
     ),
     Activity(
       id: '2',
@@ -29,6 +32,8 @@ class MockData {
       coinReward: 20,
       date: DateTime.now().subtract(const Duration(days: 1)),
       status: 'Pending',
+      co2Saved: 0.5,
+      waterSaved: 0.0,
     ),
     Activity(
       id: '3',
@@ -37,6 +42,8 @@ class MockData {
       coinReward: 30,
       date: DateTime.now().subtract(const Duration(days: 2)),
       status: 'Approved',
+      co2Saved: 1.2,
+      waterSaved: 50.0,
     ),
   ];
 

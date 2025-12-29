@@ -1,26 +1,29 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../providers/user_provider.dart';
+import '../../services/api_service.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_primary_button.dart';
 import '../../widgets/neo/neo_search_field.dart';
 
-class ActivityLogSheet extends StatefulWidget {
+class ActivityLogSheet extends ConsumerStatefulWidget {
   const ActivityLogSheet({super.key});
 
   @override
-  State<ActivityLogSheet> createState() => _ActivityLogSheetState();
+  ConsumerState<ActivityLogSheet> createState() => _ActivityLogSheetState();
 }
 
-class _ActivityLogSheetState extends State<ActivityLogSheet> {
+class _ActivityLogSheetState extends ConsumerState<ActivityLogSheet> {
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
 
@@ -28,6 +31,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
   String _query = '';
   String _selectedChip = 'Transport';
   _ActionSuggestion? _selectedAction;
+  bool _isSubmitting = false;
 
   Future<Position?> _tryGetLivePosition() async {
     try {
@@ -50,6 +54,16 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
     } catch (_) {
       return null;
     }
+  }
+
+  double _parseCo2(String subtitle) {
+    try {
+      final match = RegExp(r'([\d.]+)kg').firstMatch(subtitle);
+      if (match != null) {
+        return double.parse(match.group(1)!);
+      }
+    } catch (_) {}
+    return 0.0;
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -161,14 +175,16 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () {
-                        if (_stepIndex == 0) {
-                          Navigator.pop(context);
-                          return;
-                        }
-                        setState(() => _stepIndex -= 1);
-                      },
-                      icon: Icon(
+                      onPressed: _isSubmitting
+                          ? null
+                          : () {
+                              if (_stepIndex == 0) {
+                                Navigator.pop(context);
+                                return;
+                              }
+                              setState(() => _stepIndex -= 1);
+                            },
+                      icon: const Icon(
                         Icons.arrow_back,
                         color: AppColors.onDark,
                       ),
@@ -412,48 +428,86 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
               ),
               PositionedBottomCta(
                 child: NeoPrimaryButton(
-                  label: _stepIndex == 0 ? 'Continue' : 'Submit for Review',
-                  icon: _stepIndex == 0 ? Icons.arrow_forward : Icons.check,
-                  onPressed: () async {
-                    if (_stepIndex == 0) {
-                      if (_selectedAction == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Select an action to continue.'),
-                          ),
-                        );
-                        return;
-                      }
-                      setState(() => _stepIndex = 1);
-                      return;
-                    }
+                  label: _isSubmitting
+                      ? 'Submitting...'
+                      : (_stepIndex == 0 ? 'Continue' : 'Submit for Review'),
+                  icon: _isSubmitting
+                      ? null
+                      : (_stepIndex == 0 ? Icons.arrow_forward : Icons.check),
+                  onPressed: _isSubmitting
+                      ? () {} // Keep it active but do nothing to avoid UI jump
+                      : () async {
+                          if (_stepIndex == 0) {
+                            if (_selectedAction == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Select an action to continue.'),
+                                ),
+                              );
+                              return;
+                            }
+                            setState(() => _stepIndex = 1);
+                            return;
+                          }
 
-                    final action = _selectedAction;
-                    final position = await _tryGetLivePosition();
-                    if (action != null) {
-                      MockData.recentActivities.insert(
-                        0,
-                        Activity(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          title: action.title,
-                          category: action.category,
-                          coinReward: action.reward,
-                          date: DateTime.now(),
-                          status: 'Pending',
-                          latitude: position?.latitude,
-                          longitude: position?.longitude,
-                        ),
-                      );
-                    }
+                          setState(() => _isSubmitting = true);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Submitted for review.'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                    Navigator.pop(context);
-                  },
+                          final action = _selectedAction;
+                          final position = await _tryGetLivePosition();
+                          if (action != null) {
+                            try {
+                              final apiService = ApiService();
+                              await apiService.createActivity({
+                                'type': action.category,
+                                'title': action.title,
+                                'description': action.subtitle,
+                                'co2Saved': _parseCo2(action.subtitle),
+                                'waterSaved': 0.0,
+                              }, imagePath: _selectedImage?.path);
+
+                              MockData.recentActivities.insert(
+                                0,
+                                Activity(
+                                  id: DateTime.now()
+                                      .millisecondsSinceEpoch
+                                      .toString(),
+                                  title: action.title,
+                                  category: action.category,
+                                  coinReward: action.reward,
+                                  date: DateTime.now(),
+                                  status: 'Pending',
+                                  latitude: position?.latitude,
+                                  longitude: position?.longitude,
+                                ),
+                              );
+
+                              if (mounted) {
+                                // Refresh activities list
+                                ref.invalidate(activitiesProvider);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Submitted for review.'),
+                                    backgroundColor: AppColors.primary,
+                                  ),
+                                );
+                                Navigator.pop(context);
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                setState(() => _isSubmitting = false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text('Failed to log activity: $e')),
+                                );
+                              }
+                            }
+                          } else {
+                            setState(() => _isSubmitting = false);
+                          }
+                        },
                 ),
               ),
             ],
@@ -567,7 +621,7 @@ class _ActivityLogSheetState extends State<ActivityLogSheet> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add_a_photo,
+                        const Icon(Icons.add_a_photo,
                             size: 40, color: AppColors.mutedOnDark),
                         const SizedBox(height: 10),
                         Text(

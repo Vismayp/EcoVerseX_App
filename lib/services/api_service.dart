@@ -105,7 +105,8 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createActivity(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createActivity(Map<String, dynamic> data,
+      {String? imagePath}) async {
     if (ApiConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
       return {
@@ -114,8 +115,18 @@ class ApiService {
         'carbonSaved': 1.0, // Mock calculation
       };
     }
-    // Note: If uploading images, you'll need FormData
-    final response = await _dio.post(ApiConfig.activities, data: data);
+
+    dynamic body;
+    if (imagePath != null) {
+      body = FormData.fromMap({
+        ...data,
+        'image': await MultipartFile.fromFile(imagePath),
+      });
+    } else {
+      body = data;
+    }
+
+    final response = await _dio.post(ApiConfig.activities, data: body);
     return response.data;
   }
 

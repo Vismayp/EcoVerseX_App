@@ -13,6 +13,7 @@ import '../../widgets/neo/neo_icon_button.dart';
 import '../../widgets/neo/neo_section_header.dart';
 import '../carbon/carbon_market_screen.dart';
 import '../tours/tours_screen.dart';
+import 'activity_history_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -20,6 +21,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProvider);
+    final activitiesAsync = ref.watch(activitiesProvider);
 
     return userAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -29,270 +31,319 @@ class DashboardScreen extends ConsumerWidget {
             ? user.name
             : user.name.trim().split(' ').first;
 
-        return CustomScrollView(
-          slivers: [
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _DashboardHeaderDelegate(
-                minExtent: 100,
-                maxExtent: 100,
-                child: _BlurHeader(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 32, 16, 10),
-                    child: Row(
-                      children: [
-                        _AvatarWithStatus(
-                          imageUrl:
-                              'https://lh3.googleusercontent.com/aida-public/AB6AXuCviuQMguw4KYQ22oFiEDfLn_pX5PlLt3KCgO1Wlkd7H10jTkeqJjjVRQ0A3XEsAIFDsQ04WUNNfc2b9BiwLtXy6HU5B0h22S8c6KHBYM1xxqAJiH_S295STjiVUj5e3At5zpfKpUIy3uA__yy-mHHDEUFvEhU7lTvwc1jKn4qthzyS2ZqKh_jq0GbllEToGYyLqgbZ_JrlBaU2eNoUraGGIIfge2PW6aUJMtLrdF8pas9KxY2kJ5cgiqONFL7u4wajOprNxJmgTl0l',
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Welcome back',
-                                style: AppTheme.caption.copyWith(
-                                  color: AppColors.faintOnDark,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                firstName,
-                                style: AppTheme.headlineMedium.copyWith(
-                                  color: AppColors.onDark,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.0,
-                                ),
-                              ),
-                            ],
+        return RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(userProvider);
+            ref.invalidate(activitiesProvider);
+            await ref.read(userProvider.future);
+            await ref.read(activitiesProvider.future);
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _DashboardHeaderDelegate(
+                  minExtent: 100,
+                  maxExtent: 100,
+                  child: _BlurHeader(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 32, 16, 10),
+                      child: Row(
+                        children: [
+                          _AvatarWithStatus(
+                            imageUrl:
+                                'https://lh3.googleusercontent.com/aida-public/AB6AXuCviuQMguw4KYQ22oFiEDfLn_pX5PlLt3KCgO1Wlkd7H10jTkeqJjjVRQ0A3XEsAIFDsQ04WUNNfc2b9BiwLtXy6HU5B0h22S8c6KHBYM1xxqAJiH_S295STjiVUj5e3At5zpfKpUIy3uA__yy-mHHDEUFvEhU7lTvwc1jKn4qthzyS2ZqKh_jq0GbllEToGYyLqgbZ_JrlBaU2eNoUraGGIIfge2PW6aUJMtLrdF8pas9KxY2kJ5cgiqONFL7u4wajOprNxJmgTl0l',
                           ),
-                        ),
-                        NeoIconButton(
-                          tooltip: 'Notifications',
-                          icon: Icons.notifications,
-                          onPressed: () {},
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome back',
+                                  style: AppTheme.caption.copyWith(
+                                    color: AppColors.faintOnDark,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  firstName,
+                                  style: AppTheme.headlineMedium.copyWith(
+                                    color: AppColors.onDark,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          NeoIconButton(
+                            tooltip: 'Refresh',
+                            icon: Icons.refresh,
+                            onPressed: () {
+                              ref.invalidate(userProvider);
+                              ref.invalidate(activitiesProvider);
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          NeoIconButton(
+                            tooltip: 'Notifications',
+                            icon: Icons.notifications,
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
-              sliver: SliverToBoxAdapter(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatTile(
-                        icon: Icons.local_fire_department,
-                        iconBg: Colors.orange.withOpacity(0.18),
-                        iconColor: Colors.orange,
-                        value: '${user.streakCount} Days',
-                        label: 'Streak',
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.local_fire_department,
+                          iconBg: Colors.orange.withOpacity(0.18),
+                          iconColor: Colors.orange,
+                          value: '${user.streakCount} Days',
+                          label: 'Streak',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatTile(
-                        icon: Icons.psychology,
-                        iconBg: AppColors.primary.withOpacity(0.18),
-                        iconColor: AppColors.primary,
-                        value: user.tier,
-                        label: 'Current Tier',
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.psychology,
+                          iconBg: AppColors.primary.withOpacity(0.18),
+                          iconColor: AppColors.primary,
+                          value: user.tier,
+                          label: 'Current Tier',
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              sliver: SliverToBoxAdapter(
-                child: _HeroTreeCard(
-                  streakCount: user.streakCount,
-                  progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                sliver: SliverToBoxAdapter(
+                  child: _HeroTreeCard(
+                    streakCount: user.streakCount,
+                    progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
+                  ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-              sliver: SliverToBoxAdapter(
-                child: _WalletSection(balance: user.walletBalance),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverToBoxAdapter(
-                child: NeoSectionHeader(
-                  title: 'Your Impact',
-                  actionText: 'View History',
-                  onAction: () {},
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                sliver: SliverToBoxAdapter(
+                  child: _WalletSection(balance: user.walletBalance),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-              sliver: SliverToBoxAdapter(
-                child: _ImpactGrid(
-                  carbonSavedKg: user.carbonSaved,
-                  waterSavedL: user.waterSaved,
-                  wasteReducedKg: user.wasteReduced,
-                  treesPlanted: user.carbonSaved / 22,
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverToBoxAdapter(
+                  child: NeoSectionHeader(
+                    title: 'Your Impact',
+                    actionText: 'View History',
+                    onAction: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ActivityHistoryScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Explore',
-                      style: AppTheme.headlineSmall
-                          .copyWith(color: AppColors.onDark),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _ExploreCard(
-                            title: 'AgriTours',
-                            icon: Icons.agriculture,
-                            color: Colors.orange,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const ToursScreen(),
-                                ),
-                              );
-                            },
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                sliver: SliverToBoxAdapter(
+                  child: _ImpactGrid(
+                    carbonSavedKg: user.carbonSaved,
+                    waterSavedL: user.waterSaved,
+                    wasteReducedKg: user.wasteReduced,
+                    treesPlanted: user.treesPlanted.toDouble(),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Explore',
+                        style: AppTheme.headlineSmall
+                            .copyWith(color: AppColors.onDark),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _ExploreCard(
+                              title: 'AgriTours',
+                              icon: Icons.agriculture,
+                              color: Colors.orange,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const ToursScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ExploreCard(
+                              title: 'Carbon Market',
+                              icon: Icons.co2,
+                              color: AppColors.primary,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CarbonMarketScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Recent Activity',
+                    style: AppTheme.headlineSmall
+                        .copyWith(color: AppColors.onDark),
+                  ),
+                ),
+              ),
+              activitiesAsync.when(
+                loading: () => const SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (err, stack) => SliverToBoxAdapter(
+                  child: Center(child: Text('Error loading activities: $err')),
+                ),
+                data: (activities) {
+                  if (activities.isEmpty) {
+                    return const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Center(
+                          child: Text(
+                            'No activities yet. Start logging!',
+                            style: TextStyle(color: AppColors.mutedOnDark),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _ExploreCard(
-                            title: 'Carbon Market',
-                            icon: Icons.co2,
-                            color: AppColors.primary,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const CarbonMarketScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-              sliver: SliverToBoxAdapter(
-                child: Text(
-                  'Recent Activity',
-                  style:
-                      AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
-              sliver: SliverList.separated(
-                itemCount: MockData.recentActivities.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final activity = MockData.recentActivities[index];
-                  final isApproved =
-                      activity.status.toLowerCase() == 'approved';
+                      ),
+                    );
+                  }
+                  return SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+                    sliver: SliverList.separated(
+                      itemCount: activities.length > 3 ? 3 : activities.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final activity = activities[index];
+                        final isApproved =
+                            activity.status.toLowerCase() == 'approved';
 
-                  return NeoCard(
-                    borderRadius: BorderRadius.circular(18),
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Icon(
-                            _getActivityIcon(activity.category),
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        return NeoCard(
+                          borderRadius: BorderRadius.circular(18),
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
                             children: [
-                              Text(
-                                activity.title,
-                                style: AppTheme.bodyLarge.copyWith(
-                                  color: AppColors.onDark,
-                                  fontWeight: FontWeight.w800,
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(
+                                  _getActivityIcon(activity.category),
+                                  color: AppColors.primary,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                activity.date.toString().split(' ').first,
-                                style: AppTheme.caption
-                                    .copyWith(color: AppColors.mutedOnDark),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      activity.title,
+                                      style: AppTheme.bodyLarge.copyWith(
+                                        color: AppColors.onDark,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      activity.date.toString().split(' ').first,
+                                      style: AppTheme.caption.copyWith(
+                                        color: AppColors.mutedOnDark,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (activity.coinReward > 0)
+                                    Text(
+                                      '+${activity.coinReward} Coins',
+                                      style: AppTheme.bodyMedium.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isApproved
+                                          ? AppColors.primary.withOpacity(0.14)
+                                          : Colors.orange.withOpacity(0.16),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      activity.status,
+                                      style: AppTheme.caption.copyWith(
+                                        color: isApproved
+                                            ? AppColors.primary
+                                            : Colors.orange,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '+${activity.coinReward} Coins',
-                              style: AppTheme.bodyMedium.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isApproved
-                                    ? AppColors.primary.withOpacity(0.14)
-                                    : Colors.orange.withOpacity(0.16),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                activity.status,
-                                style: AppTheme.caption.copyWith(
-                                  color: isApproved
-                                      ? AppColors.primary
-                                      : Colors.orange,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
