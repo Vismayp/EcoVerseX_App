@@ -4,6 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../config/api.dart';
+import '../config/globals.dart';
+import '../config/theme.dart';
 
 // Background message handler must be a top-level function
 @pragma('vm:entry-point')
@@ -15,6 +20,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
+
+  static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    description:
+        'This channel is used for important notifications.', // description
+    importance: Importance.max,
+  );
 
   Future<void> initialize() async {
     // Request permission
@@ -29,14 +44,27 @@ class NotificationService {
         print('User granted permission');
       }
 
-      // Get FCM token
-      String? token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        if (kDebugMode) {
-          print('FCM Token: $token');
-        }
-        await _saveTokenToBackend(token);
-      }
+      // Request Android 13+ permission
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+
+      // Initialize local notifications
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const InitializationSettings initializationSettings =
+          InitializationSettings(android: initializationSettingsAndroid);
+      await _localNotifications.initialize(initializationSettings);
+
+      // Create Android Notification Channel
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(_channel);
+
+      // Get FCM token and sync
+      await syncToken();
 
       // Listen for token refresh
       _firebaseMessaging.onTokenRefresh.listen(_saveTokenToBackend);
@@ -48,12 +76,28 @@ class NotificationService {
           print('Message data: ${message.data}');
         }
 
-        if (message.notification != null) {
+        RemoteNotification? notification = message.notification;
+        AndroidNotification? android = message.notification?.android;
+
+        if (notification != null) {
           if (kDebugMode) {
-            print(
-                'Message also contained a notification: ${message.notification}');
+            print('Showing local notification: ${notification.title}');
           }
-          // TODO: Show local notification or snackbar
+          _localNotifications.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                _channel.id,
+                _channel.name,
+                channelDescription: _channel.description,
+                icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+                importance: Importance.max,
+                priority: Priority.high,
+              ),
+            ),
+          );
         }
       });
 
@@ -67,18 +111,25 @@ class NotificationService {
     }
   }
 
+  Future<void> syncToken() async {
+    String? token = await _firebaseMessaging.getToken();
+    if (token != null) {
+      if (kDebugMode) {
+        print('FCM Token: $token');
+      }
+      await _saveTokenToBackend(token);
+    }
+  }
+
   Future<void> _saveTokenToBackend(String token) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
       final idToken = await user.getIdToken();
-      // Replace with your actual backend URL
-      // For Android Emulator use 10.0.2.2, for iOS use localhost or IP
-      const String baseUrl = 'http://10.0.2.2:3001/api';
 
       await http.post(
-        Uri.parse('$baseUrl/user/fcm-token'),
+        Uri.parse(ApiConfig.userFcmToken),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',

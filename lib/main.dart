@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'config/theme.dart';
+import 'config/globals.dart';
 import 'screens/auth/landing_screen.dart';
 import 'services/notification_service.dart';
 
@@ -38,6 +39,7 @@ class EcoVerseXApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       title: 'EcoVerseX',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

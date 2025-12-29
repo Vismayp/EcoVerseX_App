@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
+import '../../services/notification_service.dart';
 import '../main_screen.dart';
 import 'register_screen.dart';
 
@@ -41,6 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
+      // Sync FCM token after login
+      await NotificationService().syncToken();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -60,6 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await _authService.signInWithGoogle();
+      // Sync FCM token after login
+      await NotificationService().syncToken();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),

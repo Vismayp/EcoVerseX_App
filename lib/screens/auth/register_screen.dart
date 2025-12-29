@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
+import '../../services/notification_service.dart';
 import '../main_screen.dart';
 import 'login_screen.dart';
 
@@ -48,6 +49,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Optionally update display name
       await _authService.currentUser
           ?.updateDisplayName(_usernameController.text);
+
+      // Sync FCM token after registration
+      await NotificationService().syncToken();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -67,6 +72,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       await _authService.signInWithGoogle();
+      // Sync FCM token after registration
+      await NotificationService().syncToken();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
