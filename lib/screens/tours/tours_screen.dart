@@ -2,10 +2,12 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/theme.dart';
-import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../providers/tours_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
@@ -14,14 +16,14 @@ import '../../widgets/neo/neo_scaffold.dart';
 import '../../widgets/neo/neo_search_field.dart';
 import '../../widgets/neo/neo_section_header.dart';
 
-class ToursScreen extends StatefulWidget {
+class ToursScreen extends ConsumerStatefulWidget {
   const ToursScreen({super.key});
 
   @override
-  State<ToursScreen> createState() => _ToursScreenState();
+  ConsumerState<ToursScreen> createState() => _ToursScreenState();
 }
 
-class _ToursScreenState extends State<ToursScreen> {
+class _ToursScreenState extends ConsumerState<ToursScreen> {
   final TextEditingController _searchController = TextEditingController();
   int _selectedFilter = 0;
 
@@ -40,180 +42,194 @@ class _ToursScreenState extends State<ToursScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = MockData.currentUser;
-    final tours = MockData.tours;
-
-    final query = _searchController.text.trim().toLowerCase();
-    final selectedFilter = _filters[_selectedFilter].label;
-
-    final filteredTours = tours.where((t) {
-      if (query.isNotEmpty) {
-        final haystack =
-            '${t.title} ${t.location} ${t.description}'.toLowerCase();
-        if (!haystack.contains(query)) return false;
-      }
-
-      if (selectedFilter == 'Organic Farms') {
-        return t.title.toLowerCase().contains('farm') ||
-            t.title.toLowerCase().contains('organic');
-      }
-      if (selectedFilter == 'Workshops') {
-        return t.title.toLowerCase().contains('workshop') ||
-            t.title.toLowerCase().contains('cooking');
-      }
-      if (selectedFilter == 'Volunteer') {
-        return t.title.toLowerCase().contains('volunteer') ||
-            t.description.toLowerCase().contains('volunteer');
-      }
-
-      return true;
-    }).toList(growable: false);
-
-    final featured =
-        tours.where((t) => t.rating >= 4.8).take(2).toList(growable: false);
+    final userAsync = ref.watch(userProfileProvider);
+    final toursAsync = ref.watch(toursProvider);
 
     return NeoScaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _PinnedHeaderDelegate(
-              minExtent: 150,
-              maxExtent: 150,
-              child: _BlurHeader(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: toursAsync.when(
+        data: (tours) {
+          final query = _searchController.text.trim().toLowerCase();
+          final selectedFilter = _filters[_selectedFilter].label;
+
+          final filteredTours = tours.where((t) {
+            if (query.isNotEmpty) {
+              final haystack =
+                  '${t.title} ${t.location} ${t.description}'.toLowerCase();
+              if (!haystack.contains(query)) return false;
+            }
+
+            if (selectedFilter == 'Organic Farms') {
+              return t.title.toLowerCase().contains('farm') ||
+                  t.title.toLowerCase().contains('organic');
+            }
+            if (selectedFilter == 'Workshops') {
+              return t.title.toLowerCase().contains('workshop') ||
+                  t.title.toLowerCase().contains('cooking');
+            }
+            if (selectedFilter == 'Volunteer') {
+              return t.title.toLowerCase().contains('volunteer') ||
+                  t.description.toLowerCase().contains('volunteer');
+            }
+
+            return true;
+          }).toList(growable: false);
+
+          final featured = tours
+              .where((t) => t.rating >= 4.8)
+              .take(2)
+              .toList(growable: false);
+
+          return CustomScrollView(
+            slivers: [
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _PinnedHeaderDelegate(
+                  minExtent: 150,
+                  maxExtent: 150,
+                  child: _BlurHeader(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Explore',
-                                style: AppTheme.caption.copyWith(
-                                  color: AppColors.mutedOnDark,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'AgriTours',
-                                    style: AppTheme.headlineSmall.copyWith(
-                                      color: AppColors.onDark,
-                                      fontWeight: FontWeight.w900,
+                                    'Explore',
+                                    style: AppTheme.caption.copyWith(
+                                      color: AppColors.mutedOnDark,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.8,
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    Icons.expand_more,
-                                    color: AppColors.primary,
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'AgriTours',
+                                        style: AppTheme.headlineSmall.copyWith(
+                                          color: AppColors.onDark,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      const Icon(
+                                        Icons.expand_more,
+                                        color: AppColors.primary,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
+                              userAsync.when(
+                                data: (user) =>
+                                    _WalletPill(value: user.walletBalance),
+                                loading: () => const SizedBox.shrink(),
+                                error: (_, __) => const SizedBox.shrink(),
+                              ),
                             ],
                           ),
-                          _WalletPill(value: user.walletBalance),
+                          const SizedBox(height: 12),
+                          NeoSearchField(
+                            controller: _searchController,
+                            hintText: 'Search farms, workshops...',
+                            trailingIcon: Icons.tune,
+                            onChanged: (_) => setState(() {}),
+                            onTrailingTap: () {},
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      NeoSearchField(
-                        controller: _searchController,
-                        hintText: 'Search farms, workshops in Karnataka...',
-                        trailingIcon: Icons.tune,
-                        onChanged: (_) => setState(() {}),
-                        onTrailingTap: () {},
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 64,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-                itemCount: _filters.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (context, index) {
-                  final filter = _filters[index];
-                  return NeoChip(
-                    label: filter.label,
-                    icon: filter.icon,
-                    selected: index == _selectedFilter,
-                    onTap: () => setState(() => _selectedFilter = index),
-                  );
-                },
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 64,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    itemCount: _filters.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      final filter = _filters[index];
+                      return NeoChip(
+                        label: filter.label,
+                        icon: filter.icon,
+                        selected: index == _selectedFilter,
+                        onTap: () => setState(() => _selectedFilter = index),
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-              child: NeoSectionHeader(
-                title: 'Trending Experiences',
-                actionText: 'See all',
-                onAction: () {},
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                  child: NeoSectionHeader(
+                    title: 'Trending Experiences',
+                    actionText: 'See all',
+                    onAction: () {},
+                  ),
+                ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 200,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                itemCount: featured.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 14),
-                itemBuilder: (context, index) {
-                  final tour = featured[index];
-                  final badge = index == 0 ? '🔥 Trending' : '⭐ Top Rated';
-                  return _FeaturedTourCard(tour: tour, badge: badge);
-                },
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 200,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                    itemCount: featured.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 14),
+                    itemBuilder: (context, index) {
+                      final tour = featured[index];
+                      final badge = index == 0 ? '🔥 Trending' : '⭐ Top Rated';
+                      return _FeaturedTourCard(tour: tour, badge: badge);
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-              child: Text(
-                'All Tours in Karnataka',
-                style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                  child: Text(
+                    query.isEmpty ? 'All Experiences' : 'Search Results',
+                    style: AppTheme.headlineSmall
+                        .copyWith(color: AppColors.onDark),
+                  ),
+                ),
               ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
-            sliver: SliverList.separated(
-              itemCount: filteredTours.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final tour = filteredTours[index];
-                return _TourListCard(
-                  tour: tour,
-                  showPrimaryCta: index == 0,
-                  carbonSavedKg: _estimateCarbonSavedKg(tour),
-                );
-              },
-            ),
-          ),
-        ],
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+                sliver: SliverList.separated(
+                  itemCount: filteredTours.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final tour = filteredTours[index];
+                    return _TourListCard(
+                      tour: tour,
+                      showPrimaryCta: index == 0,
+                      carbonSavedKg: _estimateCarbonSavedKg(tour),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+            child:
+                Text('Error: $e', style: const TextStyle(color: Colors.red))),
       ),
     );
   }
 
   double _estimateCarbonSavedKg(Tour tour) {
-    // Tours don't currently include carbon metrics; keep this as a lightweight,
-    // deterministic placeholder aligned with the UI template.
     final kg = (tour.price / 1000.0) * 1.3;
     return kg.clamp(0.8, 4.5);
   }
@@ -353,9 +369,9 @@ class _FeaturedTourCard extends StatelessWidget {
                 errorWidget: (context, url, error) => Container(
                   color: AppColors.cardDark,
                   alignment: Alignment.center,
-                  child: Icon(
+                  child: const Icon(
                     Icons.image_not_supported,
-                    color: AppColors.mutedOnDark,
+                    color: AppColors.onDarkMuted,
                   ),
                 ),
               ),
@@ -408,7 +424,7 @@ class _FeaturedTourCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${tour.location}, KA',
+                            tour.location,
                             style: AppTheme.caption.copyWith(
                               color: Colors.white70,
                               fontWeight: FontWeight.w700,
@@ -416,14 +432,18 @@ class _FeaturedTourCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      EcoCoinAmount(
-                        amount: tour.price.toString(),
-                        iconSize: 16,
-                        gap: 6,
-                        textStyle: AppTheme.bodyMedium.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      Row(
+                        children: [
+                          const EcoCoinIcon(size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            tour.price.toString(),
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -507,18 +527,18 @@ class _TourListCard extends StatelessWidget {
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.location_on,
                                 size: 16,
-                                color: AppColors.mutedOnDark,
+                                color: AppColors.onDarkMuted,
                               ),
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
-                                  '${tour.location}, Karnataka',
+                                  tour.location,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTheme.bodyMedium.copyWith(
-                                    color: AppColors.mutedOnDark,
+                                    color: AppColors.onDarkMuted,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -529,14 +549,18 @@ class _TourListCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    EcoCoinAmount(
-                      amount: tour.price.toString(),
-                      iconSize: 18,
-                      gap: 8,
-                      textStyle: AppTheme.headlineSmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    Row(
+                      children: [
+                        const EcoCoinIcon(size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          tour.price.toString(),
+                          style: AppTheme.headlineSmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -546,7 +570,7 @@ class _TourListCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTheme.bodyMedium.copyWith(
-                    color: AppColors.mutedOnDark,
+                    color: AppColors.onDarkMuted,
                     height: 1.35,
                   ),
                 ),
@@ -608,9 +632,9 @@ class _TourImageHeader extends StatelessWidget {
               errorWidget: (context, url, error) => Container(
                 color: AppColors.surfaceInput,
                 alignment: Alignment.center,
-                child: Icon(
+                child: const Icon(
                   Icons.image_not_supported,
-                  color: AppColors.mutedOnDark,
+                  color: AppColors.onDarkMuted,
                 ),
               ),
             ),
@@ -648,7 +672,7 @@ class _TourImageHeader extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceDarker.withOpacity(0.80),
+                  color: AppColors.backgroundDark.withOpacity(0.80),
                   borderRadius: BorderRadius.circular(12),
                   border:
                       Border.all(color: AppColors.primary.withOpacity(0.25)),
@@ -656,7 +680,7 @@ class _TourImageHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.eco, size: 16, color: AppColors.primary),
+                    const Icon(Icons.eco, size: 16, color: AppColors.primary),
                     const SizedBox(width: 6),
                     Text(
                       'Save ${carbonSavedKg.toStringAsFixed(1)}kg CO2',

@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
-final userProvider = FutureProvider.autoDispose<User>((ref) async {
+final userProfileProvider = FutureProvider.autoDispose<User>((ref) async {
   final apiService = ref.watch(apiServiceProvider);
   final data = await apiService.getUserProfile();
 
@@ -20,6 +20,8 @@ final userProvider = FutureProvider.autoDispose<User>((ref) async {
     id: data['id'] ?? '',
     name: data['displayName'] ?? 'Eco Warrior',
     email: data['email'] ?? '',
+    photoURL: data['photoURL'] ??
+        'https://ui-avatars.com/api/?name=${data['displayName'] ?? 'Eco+Warrior'}&background=random',
     walletBalance: data['ecoCoins'] ?? 0,
     streakCount: data['streak'] ?? 0,
     tier: data['tier'] ?? 'BRONZE',

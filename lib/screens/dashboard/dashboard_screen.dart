@@ -21,7 +21,7 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProvider);
+    final userAsync = ref.watch(userProfileProvider);
     final activitiesAsync = ref.watch(activitiesProvider);
 
     return userAsync.when(
@@ -34,9 +34,9 @@ class DashboardScreen extends ConsumerWidget {
 
         return RefreshIndicator(
           onRefresh: () async {
-            ref.invalidate(userProvider);
+            ref.invalidate(userProfileProvider);
             ref.invalidate(activitiesProvider);
-            await ref.read(userProvider.future);
+            await ref.read(userProfileProvider.future);
             await ref.read(activitiesProvider.future);
           },
           child: CustomScrollView(
@@ -53,8 +53,7 @@ class DashboardScreen extends ConsumerWidget {
                       child: Row(
                         children: [
                           _AvatarWithStatus(
-                            imageUrl:
-                                'https://lh3.googleusercontent.com/aida-public/AB6AXuCviuQMguw4KYQ22oFiEDfLn_pX5PlLt3KCgO1Wlkd7H10jTkeqJjjVRQ0A3XEsAIFDsQ04WUNNfc2b9BiwLtXy6HU5B0h22S8c6KHBYM1xxqAJiH_S295STjiVUj5e3At5zpfKpUIy3uA__yy-mHHDEUFvEhU7lTvwc1jKn4qthzyS2ZqKh_jq0GbllEToGYyLqgbZ_JrlBaU2eNoUraGGIIfge2PW6aUJMtLrdF8pas9KxY2kJ5cgiqONFL7u4wajOprNxJmgTl0l',
+                            imageUrl: user.photoURL,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -85,7 +84,7 @@ class DashboardScreen extends ConsumerWidget {
                             tooltip: 'Refresh',
                             icon: Icons.refresh,
                             onPressed: () {
-                              ref.invalidate(userProvider);
+                              ref.invalidate(userProfileProvider);
                               ref.invalidate(activitiesProvider);
                             },
                           ),

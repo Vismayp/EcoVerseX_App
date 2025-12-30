@@ -2,22 +2,24 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/theme.dart';
-import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../providers/shop_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_search_field.dart';
 
-class ShopScreen extends StatelessWidget {
+class ShopScreen extends ConsumerWidget {
   const ShopScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final user = MockData.currentUser;
-    final items = MockData.shopItems;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userProfileProvider);
+    final shopItemsAsync = ref.watch(shopItemsProvider);
 
     return CustomScrollView(
       slivers: [
@@ -41,18 +43,23 @@ class ShopScreen extends StatelessWidget {
                             Border.all(color: Colors.white.withOpacity(0.10)),
                       ),
                       child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              'https://lh3.googleusercontent.com/aida-public/AB6AXuB9th-AeYi_anrxkBexeA4YtbaI2-mGqbYaoBLdhCQSX90X81kRvecipmntfXgDNUkq2hlSb-TRZScBHvktqXXHAe1MbzEjdPW7i3pgdw5h_59-IOCNLjcDOPia20t4vJmCzPJpwqZf7PFaTaq-nJHYKcWk6D7YUH1rXxcbYbtZCzmBoq_bzRdTIfXmodqjT0PD2Nnw4ZlofxIivhTjWsTACwwbzq0wOtGYjzKZKxjVgqBVEDz10C0aksUVYw8Ch6ZmqCsP3qMR8EhW',
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: Colors.white.withOpacity(0.04),
+                        child: userAsync.when(
+                          data: (user) => CachedNetworkImage(
+                            imageUrl: user.photoURL,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Colors.white.withOpacity(0.04),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.white.withOpacity(0.04),
+                              child: const Icon(Icons.person,
+                                  color: AppColors.onDarkMuted),
+                            ),
                           ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.white.withOpacity(0.04),
-                            child: const Icon(Icons.person,
-                                color: AppColors.onDarkMuted),
-                          ),
+                          loading: () => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2)),
+                          error: (_, __) => const Icon(Icons.person,
+                              color: AppColors.onDarkMuted),
                         ),
                       ),
                     ),
@@ -89,7 +96,19 @@ class ShopScreen extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           sliver: SliverToBoxAdapter(
-            child: _BalanceCard(balance: user.walletBalance),
+            child: userAsync.when(
+              data: (user) => _BalanceCard(balance: user.walletBalance),
+              loading: () => Container(
+                height: 140,
+                decoration: BoxDecoration(
+                  color: AppColors.cardDark,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) =>
+                  Text('Error: $e', style: const TextStyle(color: Colors.red)),
+            ),
           ),
         ),
         SliverPadding(
@@ -167,19 +186,33 @@ class ShopScreen extends StatelessWidget {
             ),
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.73,
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
+        shopItemsAsync.when(
+          data: (items) => SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.73,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _ShopProductCard(item: items[index]),
+                childCount: items.length,
+              ),
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => _ShopProductCard(item: items[index]),
-              childCount: items.length,
-            ),
+          ),
+          loading: () => const SliverToBoxAdapter(
+            child: Center(
+                child: Padding(
+              padding: EdgeInsets.all(40.0),
+              child: CircularProgressIndicator(),
+            )),
+          ),
+          error: (e, _) => SliverToBoxAdapter(
+            child: Center(
+                child: Text('Error loading shop: $e',
+                    style: const TextStyle(color: Colors.red))),
           ),
         ),
       ],

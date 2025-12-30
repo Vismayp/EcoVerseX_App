@@ -5,6 +5,7 @@ class MockData {
     id: '1',
     name: 'Arjun Kumar',
     email: 'arjun@example.com',
+    photoURL: 'https://ui-avatars.com/api/?name=Arjun+Kumar&background=random',
     walletBalance: 1250,
     streakCount: 5,
     tier: 'Sapling',

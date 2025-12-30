@@ -2,10 +2,13 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/theme.dart';
 import '../../data/mock_data.dart';
 import '../../data/models.dart';
+import '../../providers/missions_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
@@ -20,14 +23,14 @@ class MissionsScreen extends StatelessWidget {
   }
 }
 
-class _MissionsBody extends StatefulWidget {
+class _MissionsBody extends ConsumerStatefulWidget {
   const _MissionsBody();
 
   @override
-  State<_MissionsBody> createState() => _MissionsBodyState();
+  ConsumerState<_MissionsBody> createState() => _MissionsBodyState();
 }
 
-class _MissionsBodyState extends State<_MissionsBody> {
+class _MissionsBodyState extends ConsumerState<_MissionsBody> {
   int _selectedChipIndex = 0;
 
   static const List<String> _chips = [
@@ -39,159 +42,181 @@ class _MissionsBodyState extends State<_MissionsBody> {
 
   @override
   Widget build(BuildContext context) {
-    final user = MockData.currentUser;
-    final missions = MockData.missions;
+    final userAsync = ref.watch(userProfileProvider);
+    final missionsAsync = ref.watch(missionsProvider);
 
-    final activeMissions = missions.where((m) => m.isJoined).toList();
-    final availableMissions = missions.where((m) => !m.isJoined).toList();
+    return userAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
+      data: (user) {
+        return missionsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
+          data: (missions) {
+            final activeMissions = missions.where((m) => m.isJoined).toList();
+            final availableMissions =
+                missions.where((m) => !m.isJoined).toList();
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final sidePadding = (screenWidth - (screenWidth * 0.82)) / 2;
+            final screenWidth = MediaQuery.of(context).size.width;
+            final sidePadding = (screenWidth - (screenWidth * 0.82)) / 2;
 
-    return CustomScrollView(
-      slivers: [
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _PinnedHeaderDelegate(
-            minExtent: 140,
-            maxExtent: 140,
-            child: _BlurHeader(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
+            return CustomScrollView(
+              slivers: [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _PinnedHeaderDelegate(
+                    minExtent: 140,
+                    maxExtent: 140,
+                    child: _BlurHeader(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Missions',
+                                  style: AppTheme.displayLarge.copyWith(
+                                    color: AppColors.onDark,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+                                    height: 1.0,
+                                  ),
+                                ),
+                                _WalletPill(value: user.walletBalance),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 46,
+                            child: ListView.separated(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _chips.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(width: 10),
+                              itemBuilder: (context, index) {
+                                final selected = index == _selectedChipIndex;
+                                return NeoChip(
+                                  label: _chips[index],
+                                  selected: selected,
+                                  onTap: () => setState(
+                                      () => _selectedChipIndex = index),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Missions',
-                          style: AppTheme.displayLarge.copyWith(
-                            color: AppColors.onDark,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w900,
-                            height: 1.0,
+                          'My Active Missions',
+                          style: AppTheme.headlineSmall
+                              .copyWith(color: AppColors.onDark),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                          ),
+                          child: Text(
+                            'View All',
+                            style: AppTheme.caption
+                                .copyWith(color: AppColors.primary),
                           ),
                         ),
-                        _WalletPill(value: user.walletBalance),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 46,
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 400,
                     child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding:
+                          EdgeInsets.fromLTRB(sidePadding, 4, sidePadding, 6),
                       scrollDirection: Axis.horizontal,
-                      itemCount: _chips.length,
+                      itemCount:
+                          activeMissions.isEmpty ? 1 : activeMissions.length,
                       separatorBuilder: (context, index) =>
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 14),
                       itemBuilder: (context, index) {
-                        final selected = index == _selectedChipIndex;
-                        return NeoChip(
-                          label: _chips[index],
-                          selected: selected,
-                          onTap: () =>
-                              setState(() => _selectedChipIndex = index),
-                        );
+                        if (activeMissions.isEmpty) {
+                          return SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.82,
+                            child: NeoCard(
+                              borderRadius: BorderRadius.circular(18),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.flag,
+                                      color: AppColors.primary, size: 34),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'No active missions yet',
+                                    style: AppTheme.bodyLarge
+                                        .copyWith(color: AppColors.onDark),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Join one below to get started.',
+                                    style: AppTheme.bodyMedium
+                                        .copyWith(color: AppColors.mutedOnDark),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        final mission = activeMissions[index];
+                        return _ActiveMissionCard(mission: mission);
                       },
                     ),
                   ),
-                  const SizedBox(height: 12),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'My Active Missions',
-                  style:
-                      AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                    child: Text(
+                      'Available Missions',
+                      style: AppTheme.headlineSmall
+                          .copyWith(color: AppColors.onDark),
+                    ),
                   ),
-                  child: Text(
-                    'View All',
-                    style: AppTheme.caption.copyWith(color: AppColors.primary),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+                  sliver: SliverList.separated(
+                    itemCount: availableMissions.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final mission = availableMissions[index];
+                      return _AvailableMissionCard(
+                          mission: mission, index: index);
+                    },
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: SizedBox(
-            height: 400,
-            child: ListView.separated(
-              padding: EdgeInsets.fromLTRB(sidePadding, 4, sidePadding, 6),
-              scrollDirection: Axis.horizontal,
-              itemCount: activeMissions.isEmpty ? 1 : activeMissions.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 14),
-              itemBuilder: (context, index) {
-                if (activeMissions.isEmpty) {
-                  return SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.82,
-                    child: NeoCard(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.flag, color: AppColors.primary, size: 34),
-                          const SizedBox(height: 10),
-                          Text(
-                            'No active missions yet',
-                            style: AppTheme.bodyLarge
-                                .copyWith(color: AppColors.onDark),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Join one below to get started.',
-                            style: AppTheme.bodyMedium
-                                .copyWith(color: AppColors.mutedOnDark),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                final mission = activeMissions[index];
-                return _ActiveMissionCard(mission: mission);
-              },
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Text(
-              'Available Missions',
-              style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
-          sliver: SliverList.separated(
-            itemCount: availableMissions.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final mission = availableMissions[index];
-              return _AvailableMissionCard(mission: mission, index: index);
-            },
-          ),
-        ),
-      ],
+            );
+          },
+        );
+      },
     );
   }
 }

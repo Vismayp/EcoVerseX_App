@@ -1,23 +1,25 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/theme.dart';
-import '../../data/mock_data.dart';
+import '../../providers/community_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_section_header.dart';
 
-class CommunityScreen extends StatelessWidget {
+class CommunityScreen extends ConsumerWidget {
   const CommunityScreen({super.key});
 
   static const _avatarUrl =
       'https://lh3.googleusercontent.com/aida-public/AB6AXuC4cdr7xByeoJPBCnFwM27g7SHaTBK2JnOfc73wUjeuSA-8FNzUXtrN3aUmKpuRviivnTNoSac6BikBESQwDOw1e_Vva6PFdfxqCuCtB6GuP2vl6L90LyOFuPLsAorpxys11GeUjHVFaEQ7L3mgQpdGq1ELRQxDJsZjjYsAAdDY8_44voGuH6EjomSWqYnaN4204IV2pwcV0k2Ps3ec8BUNRlNKbt9bG_Mgow1QCfDH404KilZROtf6J7CTuaSkAW6QHWLuKT0FRcBi';
 
   @override
-  Widget build(BuildContext context) {
-    final user = MockData.currentUser;
-    final groups = MockData.communityGroups;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userProfileProvider);
+    final circlesAsync = ref.watch(communityCirclesProvider);
 
     return Stack(
       children: [
@@ -36,7 +38,7 @@ class CommunityScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            _AvatarWithBadge(
+                            const _AvatarWithBadge(
                               imageUrl: _avatarUrl,
                               badgeText: '15',
                             ),
@@ -50,7 +52,12 @@ class CommunityScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        _BalancePill(balance: user.walletBalance),
+                        userAsync.when(
+                          data: (user) =>
+                              _BalancePill(balance: user.walletBalance),
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
                       ],
                     ),
                   ),
@@ -62,12 +69,17 @@ class CommunityScreen extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate(
                   [
-                    _TierProgressCard(
-                      tierLabel: '${user.tier} Tier',
-                      globalRank: 15,
-                      nextTierLabel: 'Gold Tier',
-                      pointsToNext: 350,
-                      progress: 0.65,
+                    userAsync.when(
+                      data: (user) => _TierProgressCard(
+                        tierLabel: '${user.tier} Tier',
+                        globalRank: 15,
+                        nextTierLabel: 'Gold Tier',
+                        pointsToNext: 350,
+                        progress: 0.65,
+                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Text('Error: $e'),
                     ),
                     const SizedBox(height: 18),
                     NeoSectionHeader(
@@ -86,16 +98,25 @@ class CommunityScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ...groups.map(
-                      (g) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _CommunityGroupCard(
-                          title: g.name,
-                          subtitle: g.description,
-                          icon: Icons.forum,
-                          onTap: () {},
-                        ),
+                    circlesAsync.when(
+                      data: (circles) => Column(
+                        children: circles
+                            .map(
+                              (g) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _CommunityGroupCard(
+                                  title: g.name,
+                                  subtitle: g.description,
+                                  icon: Icons.forum,
+                                  onTap: () {},
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Text('Error: $e'),
                     ),
                     _CommunityGroupCard(
                       title: 'Carbon Offset Traders',

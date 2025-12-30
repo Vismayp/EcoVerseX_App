@@ -2,6 +2,7 @@ class User {
   final String id;
   final String name;
   final String email;
+  final String photoURL;
   final int walletBalance;
   final int streakCount;
   final String tier;
@@ -14,6 +15,7 @@ class User {
     required this.id,
     required this.name,
     required this.email,
+    required this.photoURL,
     required this.walletBalance,
     required this.streakCount,
     required this.tier,
@@ -78,6 +80,8 @@ class ShopItem {
   final String description;
   final int price;
   final String imageUrl;
+  final String category;
+  final int stock;
 
   ShopItem({
     required this.id,
@@ -85,6 +89,8 @@ class ShopItem {
     required this.description,
     required this.price,
     required this.imageUrl,
+    this.category = 'General',
+    this.stock = 0,
   });
 }
 
@@ -96,6 +102,8 @@ class Tour {
   final int price;
   final double rating;
   final String imageUrl;
+  final DateTime? date;
+  final String? duration;
 
   Tour({
     required this.id,
@@ -105,6 +113,28 @@ class Tour {
     required this.price,
     required this.rating,
     required this.imageUrl,
+    this.date,
+    this.duration,
+  });
+}
+
+class CommunityCircle {
+  final String id;
+  final String name;
+  final String description;
+  final int membersCount;
+  final String imageUrl;
+  final bool isJoined;
+  final String category;
+
+  CommunityCircle({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.membersCount,
+    required this.imageUrl,
+    required this.isJoined,
+    required this.category,
   });
 }
 

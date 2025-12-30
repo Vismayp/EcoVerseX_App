@@ -1,18 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/theme.dart';
 import '../../data/models.dart';
+import '../../providers/missions_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_scaffold.dart';
 
-class MissionDetailScreen extends StatelessWidget {
+class MissionDetailScreen extends ConsumerWidget {
   final Mission mission;
 
   const MissionDetailScreen({super.key, required this.mission});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NeoScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -126,34 +129,91 @@ class MissionDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Join logic here
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Joined Mission!')),
-                  );
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            if (!mission.isJoined)
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await ref.read(apiServiceProvider).joinMission(mission.id);
+                      ref.invalidate(missionsProvider);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Joined Mission!')),
+                        );
+                        Navigator.of(context).pop();
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to join: $e')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
+                  child: Text(
+                    'Join Mission',
+                    style: AppTheme.headlineSmall.copyWith(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-                child: Text(
-                  'Join Mission',
-                  style: AppTheme.headlineSmall.copyWith(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w900,
-                  ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Mission Active',
+                          style: AppTheme.headlineSmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    LinearProgressIndicator(
+                      value: mission.progress / 100,
+                      backgroundColor: Colors.white.withOpacity(0.05),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      borderRadius: BorderRadius.circular(10),
+                      minHeight: 8,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${mission.progress.toInt()}% Completed',
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: AppColors.mutedOnDark,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
           ],
         ),
       ),
