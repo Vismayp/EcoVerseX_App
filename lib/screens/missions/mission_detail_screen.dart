@@ -38,8 +38,8 @@ class MissionDetailScreen extends ConsumerWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: CachedNetworkImage(
-                imageUrl:
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuCdgRmra0WKxUs78FW0l7VqVDdzDublIIm2OGlOGzBT0Y6qM5HT1sQJ3oCjunxHNe-PzAw1l-qV_utlzrCL5P8t8vvjNr84CFqPR_QMrJGhlXe2zCFSR5BTGhe58bywJ86562DQ21Tv4D8oo6xdPGi2LC8UI8Rptz2JZ_X31yRAA7G886Ug5i8bo8kitLnvteuKpMoZRM6YRM9X48OTSf6tpT6c7LTH-IDRuxVzwBfK-FO949GVR9C9OGS75khfuP7Z1F2wak5K6Euy', // Placeholder or map from title
+                imageUrl: mission.imageURL ??
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuCdgRmra0WKxUs78FW0l7VqVDdzDublIIm2OGlOGzBT0Y6qM5HT1sQJ3oCjunxHNe-PzAw1l-qV_utlzrCL5P8t8vvjNr84CFqPR_QMrJGhlXe2zCFSR5BTGhe58bywJ86562DQ21Tv4D8oo6xdPGi2LC8UI8Rptz2JZ_X31yRAA7G886Ug5i8bo8kitLnvteuKpMoZRM6YRM9X48OTSf6tpT6c7LTH-IDRuxVzwBfK-FO949GVR9C9OGS75khfuP7Z1F2wak5K6Euy',
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,

@@ -37,6 +37,8 @@ final missionsProvider = FutureProvider.autoDispose<List<Mission>>((ref) async {
       isJoined: item['isJoined'] ?? false,
       progress: (item['progress'] ?? 0).toDouble() / 100.0,
       status: item['userMissionStatus'],
+      imageURL: item['imageURL'],
+      isActive: item['isActive'] ?? true,
       logs: logs,
     );
   }).toList();

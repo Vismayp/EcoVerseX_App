@@ -31,7 +31,8 @@ class MyMissionsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
         data: (missions) {
-          final joinedMissions = missions.where((m) => m.isJoined).toList();
+          final joinedMissions =
+              missions.where((m) => m.isActive && m.isJoined).toList();
 
           if (joinedMissions.isEmpty) {
             return Center(

@@ -84,6 +84,8 @@ class Mission {
   final bool isJoined;
   final double progress;
   final String? status;
+  final String? imageURL;
+  final bool isActive;
   final List<MissionLog> logs;
 
   Mission({
@@ -96,6 +98,8 @@ class Mission {
     this.isJoined = false,
     this.progress = 0.0,
     this.status,
+    this.imageURL,
+    this.isActive = true,
     this.logs = const [],
   });
 }

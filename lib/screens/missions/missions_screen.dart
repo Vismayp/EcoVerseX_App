@@ -11,7 +11,6 @@ import '../../providers/missions_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
-import '../../widgets/neo/neo_chip.dart';
 import '../activity_logging/activity_log_sheet.dart';
 import 'mission_detail_screen.dart';
 import 'my_missions_screen.dart';
@@ -33,15 +32,6 @@ class _MissionsBody extends ConsumerStatefulWidget {
 }
 
 class _MissionsBodyState extends ConsumerState<_MissionsBody> {
-  int _selectedChipIndex = 0;
-
-  static const List<String> _chips = [
-    'For You',
-    'High Reward',
-    'Short Duration',
-    'Newest',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(userProfileProvider);
@@ -56,10 +46,11 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
           error: (err, stack) => Center(child: Text('Error: $err')),
           data: (missions) {
             final activeMissions = missions
-                .where((m) => m.isJoined && m.status != 'COMPLETED')
+                .where(
+                    (m) => m.isActive && m.isJoined && m.status != 'COMPLETED')
                 .toList();
             final availableMissions =
-                missions.where((m) => !m.isJoined).toList();
+                missions.where((m) => m.isActive && !m.isJoined).toList();
 
             final screenWidth = MediaQuery.of(context).size.width;
             final sidePadding = (screenWidth - (screenWidth * 0.82)) / 2;
@@ -69,8 +60,8 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: _PinnedHeaderDelegate(
-                    minExtent: 140,
-                    maxExtent: 140,
+                    minExtent: 80,
+                    maxExtent: 80,
                     child: _BlurHeader(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,27 +84,6 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: 46,
-                            child: ListView.separated(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              scrollDirection: Axis.horizontal,
-                              itemCount: _chips.length,
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(width: 10),
-                              itemBuilder: (context, index) {
-                                final selected = index == _selectedChipIndex;
-                                return NeoChip(
-                                  label: _chips[index],
-                                  selected: selected,
-                                  onTap: () => setState(
-                                      () => _selectedChipIndex = index),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
                         ],
                       ),
                     ),
@@ -324,7 +294,8 @@ class _ActiveMissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width * 0.82;
-    final imageUrl = _activeMissionImages[mission.title] ??
+    final imageUrl = mission.imageURL ??
+        _activeMissionImages[mission.title] ??
         'https://lh3.googleusercontent.com/aida-public/AB6AXuClychwMVlm6AIGPurs3GttwquSNacHwO7XpYfgfiNTnRfM627_YOKfdO0P4RhzFqJpT3Av3bfepx-RjEc7Nc4pb9BF4k1Yy1pSSFBKTazhpBH8JOJRquLJN0DfvFdvsnD5E2iHminQz_-RTghP_7QyHWopBCYi6YzlLy1SpjSSj13SSprqfycXO4HojfyBvbS95PofmhXjy_3daypAWsXYil7O7OirEpevWKgfATjuA4RY48k2Zmnm3PxdaZer6J8NNpX0lMVWtBxI';
 
     return SizedBox(
@@ -568,7 +539,7 @@ class _AvailableMissionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final badge =
         _availableMissionBadges[index % _availableMissionBadges.length];
-    final imageUrl =
+    final imageUrl = mission.imageURL ??
         _availableMissionImages[index % _availableMissionImages.length];
 
     return NeoCard(
