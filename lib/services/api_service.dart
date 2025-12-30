@@ -169,6 +169,26 @@ class ApiService {
     await _dio.post(ApiConfig.joinMission(id));
   }
 
+  Future<void> logMissionProgress(String missionId, Map<String, dynamic> data,
+      {String? imagePath}) async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      return;
+    }
+
+    dynamic body;
+    if (imagePath != null) {
+      body = FormData.fromMap({
+        ...data,
+        'image': await MultipartFile.fromFile(imagePath),
+      });
+    } else {
+      body = data;
+    }
+
+    await _dio.post(ApiConfig.logMissionProgress(missionId), data: body);
+  }
+
   // --- Shop ---
 
   Future<List<dynamic>> getShopItems() async {

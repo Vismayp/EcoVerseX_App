@@ -54,23 +54,49 @@ class Activity {
   });
 }
 
+class MissionLog {
+  final String id;
+  final String description;
+  final String? message;
+  final String? imageURL;
+  final String status;
+  final int progressIncrement;
+  final DateTime createdAt;
+
+  MissionLog({
+    required this.id,
+    required this.description,
+    this.message,
+    this.imageURL,
+    required this.status,
+    this.progressIncrement = 0,
+    required this.createdAt,
+  });
+}
+
 class Mission {
   final String id;
+  final String? userMissionId;
   final String title;
   final String description;
   final int reward;
   final int durationDays;
   final bool isJoined;
   final double progress;
+  final String? status;
+  final List<MissionLog> logs;
 
   Mission({
     required this.id,
+    this.userMissionId,
     required this.title,
     required this.description,
     required this.reward,
     required this.durationDays,
     this.isJoined = false,
     this.progress = 0.0,
+    this.status,
+    this.logs = const [],
   });
 }
 

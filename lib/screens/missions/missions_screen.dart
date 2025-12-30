@@ -12,7 +12,9 @@ import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
+import '../activity_logging/activity_log_sheet.dart';
 import 'mission_detail_screen.dart';
+import 'my_missions_screen.dart';
 
 class MissionsScreen extends StatelessWidget {
   const MissionsScreen({super.key});
@@ -53,7 +55,9 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => Center(child: Text('Error: $err')),
           data: (missions) {
-            final activeMissions = missions.where((m) => m.isJoined).toList();
+            final activeMissions = missions
+                .where((m) => m.isJoined && m.status != 'COMPLETED')
+                .toList();
             final availableMissions =
                 missions.where((m) => !m.isJoined).toList();
 
@@ -127,7 +131,13 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
                               .copyWith(color: AppColors.onDark),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const MyMissionsScreen(),
+                              ),
+                            );
+                          },
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             padding: const EdgeInsets.symmetric(
@@ -378,11 +388,17 @@ class _ActiveMissionCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.timer,
-                              size: 14, color: AppColors.primary),
+                          Icon(
+                              mission.status == 'COMPLETED'
+                                  ? Icons.check_circle
+                                  : Icons.timer,
+                              size: 14,
+                              color: AppColors.primary),
                           const SizedBox(width: 6),
                           Text(
-                            '${mission.durationDays} days left',
+                            mission.status == 'COMPLETED'
+                                ? 'Done'
+                                : '${mission.durationDays} days left',
                             style: AppTheme.caption.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w900,
@@ -458,16 +474,22 @@ class _ActiveMissionCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Progress',
+                        mission.status == 'PENDING_APPROVAL'
+                            ? 'Pending Approval'
+                            : 'Progress',
                         style: AppTheme.caption.copyWith(
-                          color: AppColors.mutedOnDark,
+                          color: mission.status == 'PENDING_APPROVAL'
+                              ? Colors.orange
+                              : AppColors.mutedOnDark,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
                         '${(mission.progress * 100).toInt()}%',
                         style: AppTheme.caption.copyWith(
-                          color: AppColors.primary,
+                          color: mission.status == 'PENDING_APPROVAL'
+                              ? Colors.orange
+                              : AppColors.primary,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -480,7 +502,9 @@ class _ActiveMissionCard extends StatelessWidget {
                       value: mission.progress,
                       minHeight: 10,
                       backgroundColor: Colors.white.withOpacity(0.10),
-                      color: AppColors.primary,
+                      color: mission.status == 'PENDING_APPROVAL'
+                          ? Colors.orange
+                          : AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -488,19 +512,38 @@ class _ActiveMissionCard extends StatelessWidget {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MissionDetailScreen(mission: mission),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
+                        backgroundColor: mission.status == 'PENDING_APPROVAL'
+                            ? Colors.orange.withOpacity(0.2)
+                            : Colors.white,
+                        foregroundColor: mission.status == 'PENDING_APPROVAL'
+                            ? Colors.orange
+                            : Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
+                        side: mission.status == 'PENDING_APPROVAL'
+                            ? const BorderSide(color: Colors.orange)
+                            : null,
                         elevation: 0,
                       ),
                       child: Text(
-                        'Log Today\'s Progress',
-                        style: AppTheme.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w800,
+                        mission.status == 'PENDING_APPROVAL'
+                            ? 'Awaiting Verification'
+                            : 'View Details',
+                        style: AppTheme.bodyLarge.copyWith(
+                          color: mission.status == 'PENDING_APPROVAL'
+                              ? Colors.orange
+                              : Colors.black,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),

@@ -7,13 +7,13 @@ class NeoPrimaryButton extends StatelessWidget {
     super.key,
     required this.label,
     this.icon,
-    required this.onPressed,
+    this.onPressed,
     this.height = 56,
   });
 
   final String label;
   final IconData? icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final double height;
 
   @override

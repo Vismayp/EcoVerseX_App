@@ -23,6 +23,7 @@ class ApiConfig {
   // Mission Endpoints
   static const String missions = '$baseUrl/missions'; // GET (list)
   static String joinMission(String id) => '$baseUrl/missions/$id/join';
+  static String logMissionProgress(String id) => '$baseUrl/missions/$id/log';
   static String updateMissionProgress(String id) =>
       '$baseUrl/missions/$id/progress';
 

@@ -8,6 +8,7 @@ import '../../providers/missions_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_scaffold.dart';
+import 'mission_log_sheet.dart';
 
 class MissionDetailScreen extends ConsumerWidget {
   final Mission mission;
@@ -77,11 +78,17 @@ class MissionDetailScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.timer,
-                          size: 16, color: AppColors.primary),
+                      Icon(
+                          mission.status == 'COMPLETED'
+                              ? Icons.check_circle
+                              : Icons.timer,
+                          size: 16,
+                          color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
-                        '${mission.durationDays} Days',
+                        mission.status == 'COMPLETED'
+                            ? 'Done'
+                            : '${mission.durationDays} Days',
                         style: AppTheme.bodyMedium.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,
@@ -136,7 +143,9 @@ class MissionDetailScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     try {
-                      await ref.read(apiServiceProvider).joinMission(mission.id);
+                      await ref
+                          .read(apiServiceProvider)
+                          .joinMission(mission.id);
                       ref.invalidate(missionsProvider);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -174,21 +183,38 @@ class MissionDetailScreen extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: mission.status == 'PENDING_APPROVAL'
+                      ? Colors.orange.withOpacity(0.1)
+                      : AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  border: Border.all(
+                      color: mission.status == 'PENDING_APPROVAL'
+                          ? Colors.orange.withOpacity(0.3)
+                          : AppColors.primary.withOpacity(0.3)),
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.check_circle, color: AppColors.primary),
+                        Icon(
+                            mission.status == 'PENDING_APPROVAL'
+                                ? Icons.hourglass_empty
+                                : Icons.check_circle,
+                            color: mission.status == 'PENDING_APPROVAL'
+                                ? Colors.orange
+                                : AppColors.primary),
                         const SizedBox(width: 8),
                         Text(
-                          'Mission Active',
+                          mission.status == 'PENDING_APPROVAL'
+                              ? 'Awaiting Approval'
+                              : mission.status == 'COMPLETED'
+                                  ? 'Mission Completed'
+                                  : 'Mission Active',
                           style: AppTheme.headlineSmall.copyWith(
-                            color: AppColors.primary,
+                            color: mission.status == 'PENDING_APPROVAL'
+                                ? Colors.orange
+                                : AppColors.primary,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -196,24 +222,169 @@ class MissionDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     LinearProgressIndicator(
-                      value: mission.progress / 100,
+                      value: mission.progress,
                       backgroundColor: Colors.white.withOpacity(0.05),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          mission.status == 'PENDING_APPROVAL'
+                              ? Colors.orange
+                              : AppColors.primary),
                       borderRadius: BorderRadius.circular(10),
                       minHeight: 8,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${mission.progress.toInt()}% Completed',
+                      '${(mission.progress * 100).toInt()}% Completed',
                       style: AppTheme.bodyMedium.copyWith(
                         color: AppColors.mutedOnDark,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (mission.status != 'PENDING_APPROVAL' &&
+                        mission.status != 'COMPLETED') ...[
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) =>
+                                  MissionLogSheet(mission: mission),
+                            );
+                          },
+                          icon: const Icon(Icons.add_a_photo_outlined),
+                          label: Text(
+                            'Log Progress',
+                            style: AppTheme.headlineSmall.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
+            if (mission.isJoined && mission.logs.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              Text(
+                'Progress History',
+                style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
+              ),
+              const SizedBox(height: 16),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: mission.logs.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final log = mission.logs[index];
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: log.status == 'APPROVED'
+                                    ? Colors.green.withOpacity(0.1)
+                                    : log.status == 'REJECTED'
+                                        ? Colors.red.withOpacity(0.1)
+                                        : Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                log.status,
+                                style: TextStyle(
+                                  color: log.status == 'APPROVED'
+                                      ? Colors.green
+                                      : log.status == 'REJECTED'
+                                          ? Colors.red
+                                          : Colors.orange,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            if (log.status == 'APPROVED')
+                              Text(
+                                '+${log.progressIncrement}% Progress',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            Text(
+                              '${log.createdAt.day}/${log.createdAt.month}/${log.createdAt.year}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.3),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          log.description,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (log.message != null && log.message!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            '"${log.message}"',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                        if (log.imageURL != null) ...[
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: CachedNetworkImage(
+                              imageUrl: log.imageURL!,
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
