@@ -35,7 +35,9 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
 
     try {
       await _authService.signInWithEmail(
@@ -45,39 +47,53 @@ class _LoginScreenState extends State<LoginScreen> {
       // Sync FCM token after login
       await NotificationService().syncToken();
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-        (route) => false,
-      );
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+          (route) => false,
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
 
     try {
       await _authService.signInWithGoogle();
       // Sync FCM token after login
       await NotificationService().syncToken();
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-        (route) => false,
-      );
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+          (route) => false,
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

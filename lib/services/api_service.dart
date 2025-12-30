@@ -3,7 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../config/api.dart';
 
 class ApiService {
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 30),
+  ));
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   ApiService() {

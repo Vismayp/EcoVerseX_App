@@ -128,14 +128,16 @@ class NotificationService {
     try {
       final idToken = await user.getIdToken();
 
-      await http.post(
-        Uri.parse(ApiConfig.userFcmToken),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $idToken',
-        },
-        body: jsonEncode({'fcmToken': token}),
-      );
+      await http
+          .post(
+            Uri.parse(ApiConfig.userFcmToken),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $idToken',
+            },
+            body: jsonEncode({'fcmToken': token}),
+          )
+          .timeout(const Duration(seconds: 30));
       if (kDebugMode) {
         print('FCM Token saved to backend');
       }

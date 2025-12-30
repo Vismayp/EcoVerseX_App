@@ -11,6 +11,7 @@ import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_icon_button.dart';
 import '../../widgets/neo/neo_section_header.dart';
+import '../../widgets/digital_tree_video_widget.dart';
 import '../carbon/carbon_market_screen.dart';
 import '../tours/tours_screen.dart';
 import 'activity_history_screen.dart';
@@ -131,9 +132,8 @@ class DashboardScreen extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 sliver: SliverToBoxAdapter(
-                  child: _HeroTreeCard(
+                  child: DigitalTreeVideoWidget(
                     streakCount: user.streakCount,
-                    progress: (user.carbonSaved / 1000).clamp(0.0, 1.0),
                   ),
                 ),
               ),
