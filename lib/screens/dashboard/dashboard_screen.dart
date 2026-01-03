@@ -42,60 +42,63 @@ class DashboardScreen extends ConsumerWidget {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverPersistentHeader(
+              SliverAppBar(
                 pinned: true,
-                delegate: _DashboardHeaderDelegate(
-                  minExtent: 100,
-                  maxExtent: 100,
-                  child: _BlurHeader(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 32, 16, 10),
-                      child: Row(
-                        children: [
-                          _AvatarWithStatus(
-                            imageUrl: user.photoURL,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Welcome back',
-                                  style: AppTheme.caption.copyWith(
-                                    color: AppColors.faintOnDark,
-                                    letterSpacing: 0.8,
-                                  ),
+                floating: false,
+                backgroundColor: AppColors.backgroundDark.withOpacity(0.86),
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                centerTitle: false,
+                titleSpacing: 0,
+                toolbarHeight: 100,
+                title: _BlurHeader(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 32, 16, 10),
+                    child: Row(
+                      children: [
+                        _AvatarWithStatus(
+                          imageUrl: user.photoURL,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Welcome back',
+                                style: AppTheme.caption.copyWith(
+                                  color: AppColors.faintOnDark,
+                                  letterSpacing: 0.8,
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  firstName,
-                                  style: AppTheme.headlineMedium.copyWith(
-                                    color: AppColors.onDark,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.0,
-                                  ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                firstName,
+                                style: AppTheme.headlineMedium.copyWith(
+                                  color: AppColors.onDark,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.0,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          NeoIconButton(
-                            tooltip: 'Refresh',
-                            icon: Icons.refresh,
-                            onPressed: () {
-                              ref.invalidate(userProfileProvider);
-                              ref.invalidate(activitiesProvider);
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          NeoIconButton(
-                            tooltip: 'Notifications',
-                            icon: Icons.notifications,
-                            onPressed: () {},
-                          ),
-                        ],
-                      ),
+                        ),
+                        NeoIconButton(
+                          tooltip: 'Refresh',
+                          icon: Icons.refresh,
+                          onPressed: () {
+                            ref.invalidate(userProfileProvider);
+                            ref.invalidate(activitiesProvider);
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        NeoIconButton(
+                          tooltip: 'Notifications',
+                          icon: Icons.notifications,
+                          onPressed: () {},
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -385,39 +388,6 @@ class _BlurHeader extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _DashboardHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _DashboardHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-  });
-
-  @override
-  final double minExtent;
-  @override
-  final double maxExtent;
-  final Widget child;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox(
-      height: maxExtent,
-      child: child,
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant _DashboardHeaderDelegate oldDelegate) {
-    return minExtent != oldDelegate.minExtent ||
-        maxExtent != oldDelegate.maxExtent ||
-        child != oldDelegate.child;
   }
 }
 

@@ -4,9 +4,9 @@ import '../config/api.dart';
 
 class ApiService {
   final Dio _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(seconds: 30),
-    sendTimeout: const Duration(seconds: 30),
+    connectTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
+    sendTimeout: const Duration(seconds: 60),
   ));
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -210,6 +210,18 @@ class ApiService {
       ];
     }
     final response = await _dio.get(ApiConfig.shopItems);
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> createOrder(String itemId, int quantity) async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      return {'status': 'success', 'orderId': 'mock_order_123'};
+    }
+    final response = await _dio.post(ApiConfig.shopOrders, data: {
+      'itemId': itemId,
+      'quantity': quantity,
+    });
     return response.data;
   }
 

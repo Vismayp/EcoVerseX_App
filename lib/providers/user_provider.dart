@@ -61,6 +61,7 @@ final activitiesProvider =
       co2Saved: (item['co2Saved'] ?? 0).toDouble(),
       waterSaved: (item['waterSaved'] ?? 0).toDouble(),
       treesPlanted: item['treesPlanted'],
+      imageURL: item['imageURL'],
     );
   }).toList();
 });

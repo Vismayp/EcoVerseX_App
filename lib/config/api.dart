@@ -4,9 +4,16 @@ class ApiConfig {
       false; // Set to true to use mock data for testing
 
   // Backend base URL - change this to your backend server URL
+  // For Android emulator, use 10.0.2.2
+  // For physical devices, use your machine's local IP (e.g., 192.168.0.101)
+  // IMPORTANT:
+  // 1. Ensure Windows Firewall allows port 3001.
+  // 2. Ensure your Wi-Fi is set to "Private" (not "Public") in Windows Settings.
+  // 3. Ensure phone and PC are on the SAME Wi-Fi network.
   static const String baseUrl =
-      'http://192.168.0.101:3001/api'; // For Android emulator - updated to actual host IP
-  // static const String baseUrl = 'http://localhost:3000/api'; // For web or iOS simulator
+      'http://192.168.0.100:3001/api'; // Physical device IP
+  // static const String baseUrl = 'http://10.0.2.2:3001/api'; // Emulator
+  // static const String baseUrl = 'http://localhost:3001/api'; // For iOS simulator or web
   // static const String baseUrl = 'https://your-production-url.com/api'; // For production
 
   // User Endpoints

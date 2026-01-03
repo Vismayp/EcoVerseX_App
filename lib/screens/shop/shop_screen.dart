@@ -23,72 +23,74 @@ class ShopScreen extends ConsumerWidget {
 
     return CustomScrollView(
       slivers: [
-        SliverPersistentHeader(
+        SliverAppBar(
           pinned: true,
-          delegate: _PinnedHeaderDelegate(
-            minExtent: 78,
-            maxExtent: 78,
-            child: _BlurHeader(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.cardDark,
-                        borderRadius: BorderRadius.circular(999),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.10)),
-                      ),
-                      child: ClipOval(
-                        child: userAsync.when(
-                          data: (user) => CachedNetworkImage(
-                            imageUrl: user.photoURL,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.white.withOpacity(0.04),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.white.withOpacity(0.04),
-                              child: const Icon(Icons.person,
-                                  color: AppColors.onDarkMuted),
-                            ),
+          floating: false,
+          backgroundColor: AppColors.backgroundDark.withOpacity(0.86),
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          centerTitle: false,
+          titleSpacing: 0,
+          toolbarHeight: 78,
+          title: _BlurHeader(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.cardDark,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Colors.white.withOpacity(0.10)),
+                    ),
+                    child: ClipOval(
+                      child: userAsync.when(
+                        data: (user) => CachedNetworkImage(
+                          imageUrl: user.photoURL,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.white.withOpacity(0.04),
                           ),
-                          loading: () => const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2)),
-                          error: (_, __) => const Icon(Icons.person,
-                              color: AppColors.onDarkMuted),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.white.withOpacity(0.04),
+                            child: const Icon(Icons.person,
+                                color: AppColors.onDarkMuted),
+                          ),
                         ),
+                        loading: () => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2)),
+                        error: (_, __) => const Icon(Icons.person,
+                            color: AppColors.onDarkMuted),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Welcome back,',
-                            style: AppTheme.bodyMedium
-                                .copyWith(color: AppColors.faintOnDark),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome back,',
+                          style: AppTheme.bodyMedium
+                              .copyWith(color: AppColors.faintOnDark),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'EcoShop',
+                          style: AppTheme.headlineMedium.copyWith(
+                            color: AppColors.onDark,
+                            fontWeight: FontWeight.w900,
+                            height: 1.0,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'EcoShop',
-                            style: AppTheme.headlineMedium.copyWith(
-                              color: AppColors.onDark,
-                              fontWeight: FontWeight.w900,
-                              height: 1.0,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    _CartButton(onPressed: () {}),
-                  ],
-                ),
+                  ),
+                  _CartButton(onPressed: () {}),
+                ],
               ),
             ),
           ),
@@ -241,36 +243,6 @@ class _BlurHeader extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _PinnedHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-  });
-
-  @override
-  final double minExtent;
-  @override
-  final double maxExtent;
-  final Widget child;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return minExtent != oldDelegate.minExtent ||
-        maxExtent != oldDelegate.maxExtent ||
-        child != oldDelegate.child;
   }
 }
 
@@ -570,13 +542,76 @@ class _FeaturedDealCard extends StatelessWidget {
   }
 }
 
-class _ShopProductCard extends StatelessWidget {
+class _ShopProductCard extends ConsumerWidget {
   const _ShopProductCard({required this.item});
 
   final ShopItem item;
 
+  Future<void> _handlePurchase(BuildContext context, WidgetRef ref) async {
+    try {
+      // Show confirmation dialog
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppColors.cardDark,
+          title: Text('Confirm Purchase',
+              style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark)),
+          content: Text(
+              'Do you want to buy ${item.name} for ${item.price} EcoCoins?',
+              style:
+                  AppTheme.bodyMedium.copyWith(color: AppColors.onDarkMuted)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              child:
+                  const Text('Buy Now', style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      // Show loading
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Processing purchase...')),
+      );
+
+      final apiService = ref.read(apiServiceProvider);
+      await apiService.createOrder(item.id, 1);
+
+      // Refresh user profile to update balance
+      ref.invalidate(userProfileProvider);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully purchased ${item.name}!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Purchase failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NeoCard(
       borderRadius: BorderRadius.circular(22),
       padding: const EdgeInsets.all(12),
@@ -658,7 +693,7 @@ class _ShopProductCard extends StatelessWidget {
                 ],
               ),
               InkWell(
-                onTap: () {},
+                onTap: () => _handlePurchase(context, ref),
                 borderRadius: BorderRadius.circular(999),
                 child: Container(
                   width: 34,

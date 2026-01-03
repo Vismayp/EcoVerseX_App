@@ -38,6 +38,7 @@ class Activity {
   final double? co2Saved;
   final double? waterSaved;
   final int? treesPlanted;
+  final String? imageURL;
 
   Activity({
     required this.id,
@@ -51,6 +52,7 @@ class Activity {
     this.co2Saved,
     this.waterSaved,
     this.treesPlanted,
+    this.imageURL,
   });
 }
 

@@ -25,41 +25,45 @@ class CommunityScreen extends ConsumerWidget {
       children: [
         CustomScrollView(
           slivers: [
-            SliverPersistentHeader(
+            SliverAppBar(
               pinned: true,
-              delegate: _PinnedHeaderDelegate(
-                minExtent: 72,
-                maxExtent: 72,
-                child: _BlurHeader(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const _AvatarWithBadge(
-                              imageUrl: _avatarUrl,
-                              badgeText: '15',
+              floating: false,
+              backgroundColor: AppColors.backgroundDark.withOpacity(0.86),
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              centerTitle: false,
+              titleSpacing: 0,
+              toolbarHeight: 82,
+              title: _BlurHeader(
+                child: Container(
+                  height: 82,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const _AvatarWithBadge(
+                            imageUrl: _avatarUrl,
+                            badgeText: '15',
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Community Hub',
+                            style: AppTheme.headlineSmall.copyWith(
+                              color: AppColors.onDark,
+                              fontWeight: FontWeight.w900,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Community Hub',
-                              style: AppTheme.headlineSmall.copyWith(
-                                color: AppColors.onDark,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                        userAsync.when(
-                          data: (user) =>
-                              _BalancePill(balance: user.walletBalance),
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => const SizedBox.shrink(),
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                      userAsync.when(
+                        data: (user) =>
+                            _BalancePill(balance: user.walletBalance),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -135,34 +139,6 @@ class CommunityScreen extends ConsumerWidget {
   }
 }
 
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double minExtent;
-  final double maxExtent;
-  final Widget child;
-
-  _PinnedHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-  });
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return minExtent != oldDelegate.minExtent ||
-        maxExtent != oldDelegate.maxExtent ||
-        child != oldDelegate.child;
-  }
-}
-
 class _BlurHeader extends StatelessWidget {
   final Widget child;
 
@@ -180,7 +156,7 @@ class _BlurHeader extends StatelessWidget {
               bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
             ),
           ),
-          child: SafeArea(bottom: false, child: child),
+          child: child,
         ),
       ),
     );
