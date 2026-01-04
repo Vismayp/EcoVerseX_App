@@ -464,6 +464,8 @@ class _ActivityLogSheetState extends ConsumerState<ActivityLogSheet> {
                                 'description': action.subtitle,
                                 'co2Saved': _parseCo2(action.subtitle),
                                 'waterSaved': 0.0,
+                                'latitude': position?.latitude,
+                                'longitude': position?.longitude,
                               }, imagePath: _selectedImage?.path);
 
                               MockData.recentActivities.insert(
