@@ -13,6 +13,7 @@ import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_search_field.dart';
+import 'buy_ecocoins_screen.dart';
 import 'order_history_screen.dart';
 
 class ShopScreen extends ConsumerWidget {
@@ -336,7 +337,14 @@ class _BalanceCard extends StatelessWidget {
                     child: SizedBox(
                       height: 42,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const BuyEcoCoinsScreen(),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.backgroundDark,
@@ -348,9 +356,9 @@ class _BalanceCard extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.add_circle, size: 18),
+                            Icon(Icons.shopping_cart, size: 18),
                             SizedBox(width: 8),
-                            Text('Earn More'),
+                            Text('Buy Now'),
                           ],
                         ),
                       ),

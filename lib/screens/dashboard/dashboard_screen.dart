@@ -12,6 +12,7 @@ import '../../widgets/neo/neo_icon_button.dart';
 import '../../widgets/neo/neo_section_header.dart';
 import '../../widgets/digital_tree_video_widget.dart';
 import '../carbon_market/carbon_market_screen.dart';
+import '../shop/buy_ecocoins_screen.dart';
 import '../tours/tours_screen.dart';
 import 'activity_history_screen.dart';
 import 'notifications_screen.dart';
@@ -665,27 +666,38 @@ class _WalletSection extends StatelessWidget {
           style: AppTheme.bodyMedium.copyWith(color: AppColors.faintOnDark),
         ),
         const SizedBox(height: 14),
-        Container(
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: Colors.white.withOpacity(0.06)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.redeem, size: 18, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Redeem Rewards',
-                style: AppTheme.bodyMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
-                ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BuyEcoCoinsScreen(),
               ),
-            ],
+            );
+          },
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white.withOpacity(0.06)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_circle_outline,
+                    size: 18, color: AppColors.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Buy EcoCoins',
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

@@ -34,6 +34,15 @@ class ApiService {
     ));
   }
 
+  // Generic methods for new endpoints
+  Future<Response> get(String path) async {
+    return await _dio.get('${ApiConfig.baseUrl}$path');
+  }
+
+  Future<Response> post(String path, {dynamic data}) async {
+    return await _dio.post('${ApiConfig.baseUrl}$path', data: data);
+  }
+
   // --- User ---
 
   Future<Map<String, dynamic>> getUserProfile() async {
