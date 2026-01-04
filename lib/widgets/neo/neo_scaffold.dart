@@ -8,6 +8,7 @@ class NeoScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget body;
   final Widget? bottomNavigationBar;
+  final Widget? bottomSheet;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final bool extendBody;
@@ -17,6 +18,7 @@ class NeoScaffold extends StatelessWidget {
     this.appBar,
     required this.body,
     this.bottomNavigationBar,
+    this.bottomSheet,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.extendBody = true,
@@ -35,6 +37,7 @@ class NeoScaffold extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: bottomNavigationBar,
+      bottomSheet: bottomSheet,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
     );

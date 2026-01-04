@@ -255,6 +255,39 @@ class ApiService {
     return response.data;
   }
 
+  Future<Map<String, dynamic>> bookTour(String tourId, int tickets,
+      DateTime bookingDate, String mobileNumber) async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      return {'status': 'success', 'bookingId': 'mock_booking_123'};
+    }
+    final response = await _dio.post(ApiConfig.bookTour, data: {
+      'tourId': tourId,
+      'tickets': tickets,
+      'bookingDate': bookingDate.toIso8601String(),
+      'mobileNumber': mobileNumber,
+    });
+    return response.data;
+  }
+
+  Future<List<dynamic>> getMyBookings() async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      return [
+        {
+          'id': 'booking_1',
+          'tour': {'name': 'Organic Farm Visit', 'location': 'California'},
+          'tickets': 2,
+          'totalCost': 200,
+          'status': 'PENDING',
+          'createdAt': DateTime.now().toIso8601String(),
+        }
+      ];
+    }
+    final response = await _dio.get(ApiConfig.myBookings);
+    return response.data;
+  }
+
   // --- Carbon ---
 
   Future<Map<String, dynamic>> getMyCredits() async {
@@ -315,5 +348,56 @@ class ApiService {
   Future<void> markNotificationAsRead(String id) async {
     if (ApiConfig.useMockData) return;
     await _dio.patch(ApiConfig.markNotificationRead(id));
+  }
+
+  // --- Carbon Market ---
+
+  Future<List<dynamic>> getCarbonProjects() async {
+    if (ApiConfig.useMockData) {
+      return [];
+    }
+    try {
+      final response = await _dio.get('${ApiConfig.baseUrl}/carbon/projects');
+      return response.data;
+    } catch (e) {
+      print('Error fetching carbon projects: $e');
+      return [];
+    }
+  }
+
+  Future<void> buyCarbonCredits(String projectId, double credits) async {
+    if (ApiConfig.useMockData) return;
+    try {
+      await _dio.post('${ApiConfig.baseUrl}/carbon/buy', data: {
+        'projectId': projectId,
+        'credits': credits,
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<Map<String, dynamic>> saveCarbonCalculation({
+    required String projectName,
+    required String treeSpecies,
+    required int treeCount,
+    required double annualSeq,
+    required double totalSeq,
+  }) async {
+    if (ApiConfig.useMockData) {
+      return {'id': 'mock_id', 'status': 'PENDING'};
+    }
+    try {
+      final response = await _dio.post(ApiConfig.carbonCalculate, data: {
+        'projectName': projectName,
+        'treeSpecies': treeSpecies,
+        'treeCount': treeCount,
+        'annualSeq': annualSeq,
+        'totalSeq': totalSeq,
+      });
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

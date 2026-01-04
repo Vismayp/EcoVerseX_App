@@ -34,8 +34,9 @@ class ApiConfig {
   static const String myOrders = '$baseUrl/shop/my-orders';
 
   // AgriTour Endpoints
-  static const String tours = '$baseUrl/tours'; // GET (list)
-  static const String bookTour = '$baseUrl/tours/book';
+  static const String tours = '$baseUrl/agritour'; // GET (list)
+  static const String bookTour = '$baseUrl/agritour/book';
+  static const String myBookings = '$baseUrl/agritour/my-bookings';
 
   // Carbon Endpoints
   static const String carbonCalculate = '$baseUrl/carbon/calculate';

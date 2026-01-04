@@ -142,14 +142,20 @@ class MockData {
       id: '1',
       name: 'Reforestation in Western Ghats',
       location: 'Karnataka',
-      pricePerTon: 15.0,
+      pricePerCredit: 15,
+      availableCredits: 1000,
+      imageURL:
+          'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=400',
       description: 'Planting native trees to restore biodiversity.',
     ),
     CarbonProject(
       id: '2',
       name: 'Solar Power for Rural Homes',
       location: 'Raichur',
-      pricePerTon: 12.0,
+      pricePerCredit: 12,
+      availableCredits: 500,
+      imageURL:
+          'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&q=80&w=400',
       description: 'Providing clean energy to off-grid villages.',
     ),
   ];

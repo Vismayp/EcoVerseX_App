@@ -18,6 +18,7 @@ final toursProvider = FutureProvider.autoDispose<List<Tour>>((ref) async {
             id: item['id']?.toString() ?? '',
             title: item['name'] ?? item['title'] ?? 'Unknown Tour',
             description: item['description'] ?? '',
+            details: item['details'],
             location: item['location'] ?? 'Unknown Location',
             price: (item['price'] ?? 0).toInt(),
             imageUrl: item['imageURL'] ?? '',

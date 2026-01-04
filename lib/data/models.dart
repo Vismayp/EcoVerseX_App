@@ -137,6 +137,7 @@ class Tour {
   final String title;
   final String location;
   final String description;
+  final String? details;
   final int price;
   final double rating;
   final String imageUrl;
@@ -148,6 +149,7 @@ class Tour {
     required this.title,
     required this.location,
     required this.description,
+    this.details,
     required this.price,
     required this.rating,
     required this.imageUrl,
@@ -178,22 +180,6 @@ class CommunityCircle {
   });
 }
 
-class CarbonProject {
-  final String id;
-  final String name;
-  final String location;
-  final double pricePerTon;
-  final String description;
-
-  CarbonProject({
-    required this.id,
-    required this.name,
-    required this.location,
-    required this.pricePerTon,
-    required this.description,
-  });
-}
-
 class CommunityGroup {
   final String id;
   final String name;
@@ -205,5 +191,25 @@ class CommunityGroup {
     required this.name,
     required this.members,
     required this.description,
+  });
+}
+
+class CarbonProject {
+  final String id;
+  final String name;
+  final String description;
+  final String location;
+  final int pricePerCredit;
+  final double availableCredits;
+  final String imageURL;
+
+  CarbonProject({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.location,
+    required this.pricePerCredit,
+    required this.availableCredits,
+    required this.imageURL,
   });
 }

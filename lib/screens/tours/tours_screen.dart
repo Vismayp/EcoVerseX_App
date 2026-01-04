@@ -15,6 +15,8 @@ import '../../widgets/neo/neo_primary_button.dart';
 import '../../widgets/neo/neo_scaffold.dart';
 import '../../widgets/neo/neo_search_field.dart';
 import '../../widgets/neo/neo_section_header.dart';
+import 'tour_details_screen.dart';
+import 'my_bookings_screen.dart';
 
 class ToursScreen extends ConsumerStatefulWidget {
   const ToursScreen({super.key});
@@ -24,22 +26,6 @@ class ToursScreen extends ConsumerStatefulWidget {
 }
 
 class _ToursScreenState extends ConsumerState<ToursScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  int _selectedFilter = 0;
-
-  static const List<_TourFilter> _filters = [
-    _TourFilter('All', Icons.travel_explore),
-    _TourFilter('Organic Farms', Icons.agriculture),
-    _TourFilter('Workshops', Icons.school),
-    _TourFilter('Volunteer', Icons.volunteer_activism),
-  ];
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(userProfileProvider);
@@ -48,37 +34,6 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
     return NeoScaffold(
       body: toursAsync.when(
         data: (tours) {
-          final query = _searchController.text.trim().toLowerCase();
-          final selectedFilter = _filters[_selectedFilter].label;
-
-          final filteredTours = tours.where((t) {
-            if (query.isNotEmpty) {
-              final haystack =
-                  '${t.title} ${t.location} ${t.description}'.toLowerCase();
-              if (!haystack.contains(query)) return false;
-            }
-
-            if (selectedFilter == 'Organic Farms') {
-              return t.title.toLowerCase().contains('farm') ||
-                  t.title.toLowerCase().contains('organic');
-            }
-            if (selectedFilter == 'Workshops') {
-              return t.title.toLowerCase().contains('workshop') ||
-                  t.title.toLowerCase().contains('cooking');
-            }
-            if (selectedFilter == 'Volunteer') {
-              return t.title.toLowerCase().contains('volunteer') ||
-                  t.description.toLowerCase().contains('volunteer');
-            }
-
-            return true;
-          }).toList(growable: false);
-
-          final featured = tours
-              .where((t) => t.rating >= 4.8)
-              .take(2)
-              .toList(growable: false);
-
           return CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -86,47 +41,51 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                 floating: false,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                toolbarHeight: 140,
+                toolbarHeight: 100,
                 automaticallyImplyLeading: false,
                 centerTitle: true,
                 flexibleSpace: const _BlurHeader(),
                 title: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Explore',
-                                style: AppTheme.caption.copyWith(
-                                  color: AppColors.mutedOnDark,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
+                          Text(
+                            'Explore',
+                            style: AppTheme.caption.copyWith(
+                              color: AppColors.mutedOnDark,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'AgriTours',
+                            style: AppTheme.headlineSmall.copyWith(
+                              color: AppColors.onDark,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const MyBookingsScreen(),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Text(
-                                    'AgriTours',
-                                    style: AppTheme.headlineSmall.copyWith(
-                                      color: AppColors.onDark,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Icon(
-                                    Icons.expand_more,
-                                    color: AppColors.primary,
-                                  ),
-                                ],
-                              ),
-                            ],
+                              );
+                            },
+                            icon: const Icon(Icons.confirmation_number_outlined,
+                                color: AppColors.primary),
+                            tooltip: 'My Bookings',
                           ),
                           userAsync.when(
                             data: (user) =>
@@ -136,84 +95,20 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      NeoSearchField(
-                        controller: _searchController,
-                        hintText: 'Search farms, workshops...',
-                        trailingIcon: Icons.tune,
-                        onChanged: (_) => setState(() {}),
-                        onTrailingTap: () {},
-                      ),
                     ],
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 64,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-                    itemCount: _filters.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final filter = _filters[index];
-                      return NeoChip(
-                        label: filter.label,
-                        icon: filter.icon,
-                        selected: index == _selectedFilter,
-                        onTap: () => setState(() => _selectedFilter = index),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-                  child: NeoSectionHeader(
-                    title: 'Trending Experiences',
-                    actionText: 'See all',
-                    onAction: () {},
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 200,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                    itemCount: featured.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 14),
-                    itemBuilder: (context, index) {
-                      final tour = featured[index];
-                      final badge = index == 0 ? '🔥 Trending' : '⭐ Top Rated';
-                      return _FeaturedTourCard(tour: tour, badge: badge);
-                    },
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                  child: Text(
-                    query.isEmpty ? 'All Experiences' : 'Search Results',
-                    style: AppTheme.headlineSmall
-                        .copyWith(color: AppColors.onDark),
-                  ),
-                ),
-              ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 130),
                 sliver: SliverList.separated(
-                  itemCount: filteredTours.length,
+                  itemCount: tours.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
-                    final tour = filteredTours[index];
+                    final tour = tours[index];
                     return _TourListCard(
                       tour: tour,
-                      showPrimaryCta: index == 0,
+                      showPrimaryCta: true,
                       carbonSavedKg: _estimateCarbonSavedKg(tour),
                     );
                   },
@@ -294,162 +189,6 @@ class _WalletPill extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FeaturedTourCard extends StatelessWidget {
-  final Tour tour;
-  final String badge;
-
-  const _FeaturedTourCard({
-    required this.tour,
-    required this.badge,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 290,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.28),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: CachedNetworkImage(
-                imageUrl: tour.imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: AppColors.cardDark,
-                  alignment: Alignment.center,
-                  child: const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: AppColors.cardDark,
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.image_not_supported,
-                    color: AppColors.onDarkMuted,
-                  ),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.10),
-                      Colors.black.withOpacity(0.65),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: _BadgePill(text: badge),
-            ),
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tour.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTheme.headlineSmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on,
-                            size: 14,
-                            color: Colors.white70,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            tour.location,
-                            style: AppTheme.caption.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const EcoCoinIcon(size: 16),
-                          const SizedBox(width: 6),
-                          Text(
-                            tour.price.toString(),
-                            style: AppTheme.bodyMedium.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BadgePill extends StatelessWidget {
-  final String text;
-
-  const _BadgePill({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.20)),
-      ),
-      child: Text(
-        text,
-        style: AppTheme.caption.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w900,
-        ),
       ),
     );
   }
@@ -553,12 +292,26 @@ class _TourListCard extends StatelessWidget {
                     label: 'Book Now',
                     icon: Icons.arrow_forward,
                     height: 52,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TourDetailsScreen(tour: tour),
+                        ),
+                      );
+                    },
                   )
                 else
                   _SecondaryButton(
                     label: 'View Details',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TourDetailsScreen(tour: tour),
+                        ),
+                      );
+                    },
                   ),
               ],
             ),
