@@ -23,6 +23,14 @@ final shopItemsProvider =
             imageUrl: item['imageURL'] ?? '',
             category: item['category'] ?? 'General',
             stock: item['stock'] ?? 0,
+            isFeatured: item['isFeatured'] ?? false,
           ))
       .toList();
+});
+
+final userOrdersProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final apiService = ref.watch(apiServiceProvider);
+  final List<dynamic> data = await apiService.getMyOrders();
+  return data.cast<Map<String, dynamic>>();
 });

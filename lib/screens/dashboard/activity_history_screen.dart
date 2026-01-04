@@ -16,6 +16,7 @@ class ActivityHistoryScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
         title: Text(
           'Activity History',
           style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark),

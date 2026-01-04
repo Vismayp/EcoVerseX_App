@@ -6,6 +6,8 @@ class User {
   final int walletBalance;
   final int streakCount;
   final String tier;
+  final int points;
+  final int rank;
   final double carbonSaved;
   final double waterSaved;
   final double wasteReduced;
@@ -19,6 +21,8 @@ class User {
     required this.walletBalance,
     required this.streakCount,
     required this.tier,
+    required this.points,
+    required this.rank,
     required this.carbonSaved,
     required this.waterSaved,
     required this.wasteReduced,
@@ -114,6 +118,7 @@ class ShopItem {
   final String imageUrl;
   final String category;
   final int stock;
+  final bool isFeatured;
 
   ShopItem({
     required this.id,
@@ -123,6 +128,7 @@ class ShopItem {
     required this.imageUrl,
     this.category = 'General',
     this.stock = 0,
+    this.isFeatured = false,
   });
 }
 
@@ -155,18 +161,20 @@ class CommunityCircle {
   final String name;
   final String description;
   final int membersCount;
-  final String imageUrl;
   final bool isJoined;
   final String category;
+  final String? link;
+  final String? platform;
 
   CommunityCircle({
     required this.id,
     required this.name,
     required this.description,
     required this.membersCount,
-    required this.imageUrl,
     required this.isJoined,
     required this.category,
+    this.link,
+    this.platform,
   });
 }
 

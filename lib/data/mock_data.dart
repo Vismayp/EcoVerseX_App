@@ -9,6 +9,8 @@ class MockData {
     walletBalance: 1250,
     streakCount: 5,
     tier: 'Sapling',
+    points: 1250,
+    rank: 12,
     carbonSaved: 45.5,
     waterSaved: 120.0,
     wasteReduced: 15.2,

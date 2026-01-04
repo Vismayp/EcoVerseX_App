@@ -213,7 +213,8 @@ class ApiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> createOrder(String itemId, int quantity) async {
+  Future<Map<String, dynamic>> createOrder(
+      String itemId, int quantity, String mobileNumber) async {
     if (ApiConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
       return {'status': 'success', 'orderId': 'mock_order_123'};
@@ -221,7 +222,17 @@ class ApiService {
     final response = await _dio.post(ApiConfig.shopOrders, data: {
       'itemId': itemId,
       'quantity': quantity,
+      'mobileNumber': mobileNumber,
     });
+    return response.data;
+  }
+
+  Future<List<dynamic>> getMyOrders() async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      return [];
+    }
+    final response = await _dio.get(ApiConfig.myOrders);
     return response.data;
   }
 
@@ -273,5 +284,36 @@ class ApiService {
     }
     final response = await _dio.get(ApiConfig.circles);
     return response.data;
+  }
+
+  Future<void> trackCircleClick(String id) async {
+    if (ApiConfig.useMockData) return;
+    await _dio.post(ApiConfig.trackCircleClick(id));
+  }
+
+  // --- Notifications ---
+
+  Future<List<dynamic>> getNotifications() async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      return [
+        {
+          'id': 'notif_1',
+          'title': 'Welcome to EcoVerse!',
+          'body': 'Start your journey to a greener planet today.',
+          'createdAt': DateTime.now()
+              .subtract(const Duration(hours: 2))
+              .toIso8601String(),
+          'isRead': false,
+        },
+      ];
+    }
+    final response = await _dio.get(ApiConfig.notifications);
+    return response.data;
+  }
+
+  Future<void> markNotificationAsRead(String id) async {
+    if (ApiConfig.useMockData) return;
+    await _dio.patch(ApiConfig.markNotificationRead(id));
   }
 }

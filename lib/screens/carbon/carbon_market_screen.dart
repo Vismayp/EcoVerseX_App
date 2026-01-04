@@ -44,76 +44,73 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen> {
     return NeoScaffold(
       body: CustomScrollView(
         slivers: [
-          SliverPersistentHeader(
+          SliverAppBar(
             pinned: true,
-            delegate: _PinnedHeaderDelegate(
-              minExtent: 152,
-              maxExtent: 152,
-              child: _BlurHeader(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            floating: false,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            toolbarHeight: 140,
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            flexibleSpace: const _BlurHeader(),
+            title: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Marketplace',
-                                style: AppTheme.caption.copyWith(
-                                  color: AppColors.mutedOnDark,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Carbon Market',
-                                style: AppTheme.headlineSmall.copyWith(
-                                  color: AppColors.onDark,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'Marketplace',
+                            style: AppTheme.caption.copyWith(
+                              color: AppColors.mutedOnDark,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                            ),
                           ),
-                          _WalletPill(value: user.walletBalance),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Carbon Market',
+                            style: AppTheme.headlineSmall.copyWith(
+                              color: AppColors.onDark,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Buy verified carbon offsets and trade credits',
-                        style: AppTheme.bodyMedium.copyWith(
-                          color: AppColors.mutedOnDark,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 44,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 2,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            final label =
-                                index == 0 ? 'Calculator' : 'Marketplace';
-                            return NeoChip(
-                              label: label,
-                              icon: index == 0
-                                  ? Icons.calculate
-                                  : Icons.storefront,
-                              selected: _tabIndex == index,
-                              onTap: () => setState(() => _tabIndex = index),
-                            );
-                          },
-                        ),
-                      ),
+                      _WalletPill(value: user.walletBalance),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Buy verified carbon offsets and trade credits',
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppColors.mutedOnDark,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 44,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 2,
+                      separatorBuilder: (_, __) => const SizedBox(width: 10),
+                      itemBuilder: (context, index) {
+                        final label = index == 0 ? 'Calculator' : 'Marketplace';
+                        return NeoChip(
+                          label: label,
+                          icon: index == 0 ? Icons.calculate : Icons.storefront,
+                          selected: _tabIndex == index,
+                          onTap: () => setState(() => _tabIndex = index),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -137,38 +134,10 @@ class _CarbonMarketScreenState extends State<CarbonMarketScreen> {
   }
 }
 
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double minExtent;
-  final double maxExtent;
-  final Widget child;
-
-  _PinnedHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-  });
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return minExtent != oldDelegate.minExtent ||
-        maxExtent != oldDelegate.maxExtent ||
-        child != oldDelegate.child;
-  }
-}
-
 class _BlurHeader extends StatelessWidget {
-  const _BlurHeader({required this.child});
+  const _BlurHeader({this.child});
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +151,7 @@ class _BlurHeader extends StatelessWidget {
               bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
             ),
           ),
-          child: child,
+          child: child ?? const SizedBox.expand(),
         ),
       ),
     );

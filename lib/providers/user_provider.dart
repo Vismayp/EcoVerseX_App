@@ -25,11 +25,37 @@ final userProfileProvider = FutureProvider.autoDispose<User>((ref) async {
     walletBalance: data['ecoCoins'] ?? 0,
     streakCount: data['streak'] ?? 0,
     tier: data['tier'] ?? 'BRONZE',
+    points: data['points'] ?? 0,
+    rank: data['rank'] ?? 0,
     carbonSaved: (data['totalCarbonSaved'] ?? 0).toDouble(),
     waterSaved: (data['totalWaterSaved'] ?? 0).toDouble(),
     wasteReduced: (data['wasteReduced'] ?? 0).toDouble(),
     treesPlanted: data['totalTreesPlanted'] ?? 0,
   );
+});
+
+final leaderboardProvider = FutureProvider.autoDispose<List<User>>((ref) async {
+  final apiService = ref.watch(apiServiceProvider);
+  final List<dynamic> data = await apiService.getLeaderboard();
+
+  return data.map((item) {
+    return User(
+      id: item['id'] ?? '',
+      name: item['displayName'] ?? 'Eco Warrior',
+      email: item['email'] ?? '',
+      photoURL: item['photoURL'] ??
+          'https://ui-avatars.com/api/?name=${item['displayName'] ?? 'Eco+Warrior'}&background=random',
+      walletBalance: item['ecoCoins'] ?? 0,
+      streakCount: item['streak'] ?? 0,
+      tier: item['tier'] ?? 'BRONZE',
+      points: item['points'] ?? 0,
+      rank: item['rank'] ?? 0,
+      carbonSaved: 0,
+      waterSaved: 0,
+      wasteReduced: 0,
+      treesPlanted: 0,
+    );
+  }).toList();
 });
 
 final activitiesProvider =

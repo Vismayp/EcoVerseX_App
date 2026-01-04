@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +13,7 @@ import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_chip.dart';
 import '../../widgets/neo/neo_search_field.dart';
+import 'order_history_screen.dart';
 
 class ShopScreen extends ConsumerWidget {
   const ShopScreen({super.key});
@@ -26,72 +28,70 @@ class ShopScreen extends ConsumerWidget {
         SliverAppBar(
           pinned: true,
           floating: false,
-          backgroundColor: AppColors.backgroundDark.withOpacity(0.86),
+          backgroundColor: Colors.transparent,
           elevation: 0,
           automaticallyImplyLeading: false,
-          centerTitle: false,
+          centerTitle: true,
           titleSpacing: 0,
-          toolbarHeight: 78,
-          title: _BlurHeader(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.cardDark,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: Colors.white.withOpacity(0.10)),
-                    ),
-                    child: ClipOval(
-                      child: userAsync.when(
-                        data: (user) => CachedNetworkImage(
-                          imageUrl: user.photoURL,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: Colors.white.withOpacity(0.04),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.white.withOpacity(0.04),
-                            child: const Icon(Icons.person,
-                                color: AppColors.onDarkMuted),
-                          ),
+          toolbarHeight: 80,
+          flexibleSpace: const _BlurHeader(child: SizedBox.expand()),
+          title: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.cardDark,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: Colors.white.withOpacity(0.10)),
+                  ),
+                  child: ClipOval(
+                    child: userAsync.when(
+                      data: (user) => CachedNetworkImage(
+                        imageUrl: user.photoURL,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.white.withOpacity(0.04),
                         ),
-                        loading: () => const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2)),
-                        error: (_, __) => const Icon(Icons.person,
-                            color: AppColors.onDarkMuted),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.white.withOpacity(0.04),
+                          child: const Icon(Icons.person,
+                              color: AppColors.onDarkMuted),
+                        ),
                       ),
+                      loading: () => const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                      error: (_, __) => const Icon(Icons.person,
+                          color: AppColors.onDarkMuted),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome back,',
-                          style: AppTheme.bodyMedium
-                              .copyWith(color: AppColors.faintOnDark),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome back,',
+                        style: AppTheme.bodyMedium
+                            .copyWith(color: AppColors.faintOnDark),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'EcoShop',
+                        style: AppTheme.headlineMedium.copyWith(
+                          color: AppColors.onDark,
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'EcoShop',
-                          style: AppTheme.headlineMedium.copyWith(
-                            color: AppColors.onDark,
-                            fontWeight: FontWeight.w900,
-                            height: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  _CartButton(onPressed: () {}),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -113,6 +113,7 @@ class ShopScreen extends ConsumerWidget {
             ),
           ),
         ),
+        /*
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
           sliver: SliverToBoxAdapter(
@@ -124,6 +125,8 @@ class ShopScreen extends ConsumerWidget {
             ),
           ),
         ),
+        */
+        /*
         SliverToBoxAdapter(
           child: SizedBox(
             height: 44,
@@ -139,6 +142,7 @@ class ShopScreen extends ConsumerWidget {
             ),
           ),
         ),
+        */
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
           sliver: SliverToBoxAdapter(
@@ -150,6 +154,7 @@ class ShopScreen extends ConsumerWidget {
                   style:
                       AppTheme.headlineSmall.copyWith(color: AppColors.onDark),
                 ),
+                /*
                 TextButton(
                   onPressed: () {},
                   style:
@@ -160,23 +165,38 @@ class ShopScreen extends ConsumerWidget {
                         color: AppColors.primary, fontWeight: FontWeight.w800),
                   ),
                 ),
+                */
               ],
             ),
           ),
         ),
         SliverToBoxAdapter(
-          child: SizedBox(
-            height: 180,
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
-              scrollDirection: Axis.horizontal,
-              itemCount: _featuredDeals.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 14),
-              itemBuilder: (context, index) {
-                final deal = _featuredDeals[index];
-                return _FeaturedDealCard(deal: deal);
-              },
+          child: shopItemsAsync.when(
+            data: (items) {
+              final featuredItems =
+                  items.where((item) => item.isFeatured).toList();
+              if (featuredItems.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return SizedBox(
+                height: 180,
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: featuredItems.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 14),
+                  itemBuilder: (context, index) {
+                    return _FeaturedDealCard(item: featuredItems[index]);
+                  },
+                ),
+              );
+            },
+            loading: () => const SizedBox(
+              height: 180,
+              child: Center(child: CircularProgressIndicator()),
             ),
+            error: (_, __) => const SizedBox.shrink(),
           ),
         ),
         SliverPadding(
@@ -223,16 +243,18 @@ class ShopScreen extends ConsumerWidget {
 }
 
 class _BlurHeader extends StatelessWidget {
-  const _BlurHeader({required this.child});
+  const _BlurHeader({this.child});
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: DecoratedBox(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
           decoration: BoxDecoration(
             color: AppColors.backgroundDark.withOpacity(0.92),
             border: Border(
@@ -240,50 +262,6 @@ class _BlurHeader extends StatelessWidget {
             ),
           ),
           child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _CartButton extends StatelessWidget {
-  const _CartButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.cardDark,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Icon(Icons.shopping_cart, color: AppColors.onDark),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -383,7 +361,14 @@ class _BalanceCard extends StatelessWidget {
                     child: SizedBox(
                       height: 42,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OrderHistoryScreen(),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white.withOpacity(0.06),
                           foregroundColor: AppColors.onDark,
@@ -431,26 +416,10 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-class _FeaturedDeal {
-  const _FeaturedDeal({
-    required this.badge,
-    required this.title,
-    required this.subtitle,
-    required this.imageUrl,
-    this.primaryBadge = true,
-  });
-
-  final String badge;
-  final String title;
-  final String subtitle;
-  final String imageUrl;
-  final bool primaryBadge;
-}
-
 class _FeaturedDealCard extends StatelessWidget {
-  const _FeaturedDealCard({required this.deal});
+  const _FeaturedDealCard({required this.item});
 
-  final _FeaturedDeal deal;
+  final ShopItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -463,7 +432,7 @@ class _FeaturedDealCard extends StatelessWidget {
           children: [
             Positioned.fill(
               child: CachedNetworkImage(
-                imageUrl: deal.imageUrl,
+                imageUrl: item.imageUrl,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
                   color: Colors.white.withOpacity(0.04),
@@ -500,23 +469,20 @@ class _FeaturedDealCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color:
-                          deal.primaryBadge ? AppColors.primary : Colors.white,
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      deal.badge,
+                      'FEATURED',
                       style: AppTheme.caption.copyWith(
-                        color: deal.primaryBadge
-                            ? AppColors.backgroundDark
-                            : AppColors.backgroundDark,
+                        color: AppColors.backgroundDark,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    deal.title,
+                    item.name,
                     style: AppTheme.headlineSmall.copyWith(
                       color: AppColors.onDark,
                       fontWeight: FontWeight.w900,
@@ -526,7 +492,7 @@ class _FeaturedDealCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    deal.subtitle,
+                    item.description,
                     style: AppTheme.bodyMedium
                         .copyWith(color: AppColors.onDarkMuted),
                     maxLines: 1,
@@ -542,6 +508,98 @@ class _FeaturedDealCard extends StatelessWidget {
   }
 }
 
+class _PurchaseDialog extends StatefulWidget {
+  final ShopItem item;
+
+  const _PurchaseDialog({required this.item});
+
+  @override
+  State<_PurchaseDialog> createState() => _PurchaseDialogState();
+}
+
+class _PurchaseDialogState extends State<_PurchaseDialog> {
+  final TextEditingController _phoneController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.cardDark,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      title: Text('Confirm Purchase',
+          style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark)),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                'Do you want to buy ${widget.item.name} for ${widget.item.price} EcoCoins?',
+                style:
+                    AppTheme.bodyMedium.copyWith(color: AppColors.onDarkMuted)),
+            const SizedBox(height: 20),
+            Text('Delivery Contact Number',
+                style: AppTheme.caption.copyWith(color: AppColors.primary)),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Enter mobile number',
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your mobile number';
+                }
+                if (value.length < 10) {
+                  return 'Please enter a valid number';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, null),
+          child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              Navigator.pop(context, _phoneController.text);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          child: const Text('Buy Now', style: TextStyle(color: Colors.black)),
+        ),
+      ],
+    );
+  }
+}
+
 class _ShopProductCard extends ConsumerWidget {
   const _ShopProductCard({required this.item});
 
@@ -549,34 +607,13 @@ class _ShopProductCard extends ConsumerWidget {
 
   Future<void> _handlePurchase(BuildContext context, WidgetRef ref) async {
     try {
-      // Show confirmation dialog
-      final confirmed = await showDialog<bool>(
+      // Show confirmation dialog with mobile number input
+      final String? mobileNumber = await showDialog<String>(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: AppColors.cardDark,
-          title: Text('Confirm Purchase',
-              style: AppTheme.headlineSmall.copyWith(color: AppColors.onDark)),
-          content: Text(
-              'Do you want to buy ${item.name} for ${item.price} EcoCoins?',
-              style:
-                  AppTheme.bodyMedium.copyWith(color: AppColors.onDarkMuted)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child:
-                  const Text('Buy Now', style: TextStyle(color: Colors.black)),
-            ),
-          ],
-        ),
+        builder: (context) => _PurchaseDialog(item: item),
       );
 
-      if (confirmed != true) return;
+      if (mobileNumber == null) return;
 
       // Show loading
       if (!context.mounted) return;
@@ -585,7 +622,7 @@ class _ShopProductCard extends ConsumerWidget {
       );
 
       final apiService = ref.read(apiServiceProvider);
-      await apiService.createOrder(item.id, 1);
+      await apiService.createOrder(item.id, 1, mobileNumber);
 
       // Refresh user profile to update balance
       ref.invalidate(userProfileProvider);
@@ -599,11 +636,16 @@ class _ShopProductCard extends ConsumerWidget {
         ),
       );
     } catch (e) {
+      String errorMessage = e.toString();
+      if (e is DioException) {
+        errorMessage = e.response?.data['error'] ?? e.message;
+      }
+
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Purchase failed: $e'),
+          content: Text('Purchase failed: $errorMessage'),
           backgroundColor: Colors.red,
         ),
       );
@@ -720,23 +762,4 @@ const List<String> _categories = [
   'Personal Care',
   'Stationery',
   'Lifestyle',
-];
-
-const List<_FeaturedDeal> _featuredDeals = [
-  _FeaturedDeal(
-    badge: '20% OFF',
-    title: 'Bamboo Essentials Kit',
-    subtitle: 'Start your zero-waste journey.',
-    imageUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuATrk1IgD45iB2I2Qj3GKjzkXlx-TAGYDNZQvw997bfK-VZzBCCz8I6OCEUhksZXqb2TqqRpmszkK2X_IIDZOIvcZhAys0MP7FMpCHKYom_lVb7ioYTm7XaEdWef2AXqdaI908DXwd--RS9H47IVNC0QUo3RmFk7zX_pKA0MRNjofQYSX7lMiX9Ue8a4KNnetA7enjoSdiUC_ba2kgFSyIOXaErpwUNol7iE_Vpa6xNL0VtDTHKiwo-0IShV32IYOzD8Tdvw8MOtwHM',
-    primaryBadge: true,
-  ),
-  _FeaturedDeal(
-    badge: 'New Arrival',
-    title: 'Insulated Flask',
-    subtitle: 'Keep it cold for 24h.',
-    imageUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBUNBqAAiQaqbWEBP3BWYnk_Y5SrKX2VFBS-odru0EbU5EuacWsHLQNKm0EDZIP9iplfGb89B1b11OClenJRt6s7mUgNouMhgnF-L-suSDaSg2aGAsiezi7IvIm2l9g2vPsBD5NUG4LZC1svKtqgtruQuXbZSmZnEBboaSGhtn8s5YtWeOYts10ulq-qPxA_J0ky_vDFk0HqS4lAQzSqcMuoH1rXGNOl3QGNEzIbUf_le-7FoLUgqCVFtzFas1g_UWBHLawsaZz9d2U',
-    primaryBadge: false,
-  ),
 ];

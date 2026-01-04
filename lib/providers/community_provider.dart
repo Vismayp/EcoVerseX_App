@@ -19,10 +19,11 @@ final communityCirclesProvider =
             id: item['id']?.toString() ?? '',
             name: item['name'] ?? 'Unknown Circle',
             description: item['description'] ?? '',
-            membersCount: item['membersCount'] ?? 0,
-            imageUrl: item['imageURL'] ?? '',
+            membersCount: item['_count']?['members'] ?? 0,
             isJoined: item['isJoined'] ?? false,
             category: item['category'] ?? 'General',
+            link: item['link'],
+            platform: item['platform'],
           ))
       .toList();
 });

@@ -81,69 +81,70 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
 
           return CustomScrollView(
             slivers: [
-              SliverPersistentHeader(
+              SliverAppBar(
                 pinned: true,
-                delegate: _PinnedHeaderDelegate(
-                  minExtent: 150,
-                  maxExtent: 150,
-                  child: _BlurHeader(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                floating: false,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                toolbarHeight: 140,
+                automaticallyImplyLeading: false,
+                centerTitle: true,
+                flexibleSpace: const _BlurHeader(),
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Text(
+                                'Explore',
+                                style: AppTheme.caption.copyWith(
+                                  color: AppColors.mutedOnDark,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
                                 children: [
                                   Text(
-                                    'Explore',
-                                    style: AppTheme.caption.copyWith(
-                                      color: AppColors.mutedOnDark,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.8,
+                                    'AgriTours',
+                                    style: AppTheme.headlineSmall.copyWith(
+                                      color: AppColors.onDark,
+                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'AgriTours',
-                                        style: AppTheme.headlineSmall.copyWith(
-                                          color: AppColors.onDark,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      const Icon(
-                                        Icons.expand_more,
-                                        color: AppColors.primary,
-                                      ),
-                                    ],
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.expand_more,
+                                    color: AppColors.primary,
                                   ),
                                 ],
                               ),
-                              userAsync.when(
-                                data: (user) =>
-                                    _WalletPill(value: user.walletBalance),
-                                loading: () => const SizedBox.shrink(),
-                                error: (_, __) => const SizedBox.shrink(),
-                              ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          NeoSearchField(
-                            controller: _searchController,
-                            hintText: 'Search farms, workshops...',
-                            trailingIcon: Icons.tune,
-                            onChanged: (_) => setState(() {}),
-                            onTrailingTap: () {},
+                          userAsync.when(
+                            data: (user) =>
+                                _WalletPill(value: user.walletBalance),
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, __) => const SizedBox.shrink(),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      NeoSearchField(
+                        controller: _searchController,
+                        hintText: 'Search farms, workshops...',
+                        trailingIcon: Icons.tune,
+                        onChanged: (_) => setState(() {}),
+                        onTrailingTap: () {},
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -242,38 +243,10 @@ class _TourFilter {
   const _TourFilter(this.label, this.icon);
 }
 
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double minExtent;
-  final double maxExtent;
-  final Widget child;
-
-  _PinnedHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-  });
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return minExtent != oldDelegate.minExtent ||
-        maxExtent != oldDelegate.maxExtent ||
-        child != oldDelegate.child;
-  }
-}
-
 class _BlurHeader extends StatelessWidget {
-  const _BlurHeader({required this.child});
+  const _BlurHeader({this.child});
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -287,7 +260,7 @@ class _BlurHeader extends StatelessWidget {
               bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
             ),
           ),
-          child: child,
+          child: child ?? const SizedBox.expand(),
         ),
       ),
     );

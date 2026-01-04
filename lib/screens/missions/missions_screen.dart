@@ -57,35 +57,31 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
 
             return CustomScrollView(
               slivers: [
-                SliverPersistentHeader(
+                SliverAppBar(
                   pinned: true,
-                  delegate: _PinnedHeaderDelegate(
-                    minExtent: 80,
-                    maxExtent: 80,
-                    child: _BlurHeader(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Missions',
-                                  style: AppTheme.displayLarge.copyWith(
-                                    color: AppColors.onDark,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w900,
-                                    height: 1.0,
-                                  ),
-                                ),
-                                _WalletPill(value: user.walletBalance),
-                              ],
-                            ),
+                  floating: false,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  toolbarHeight: 80,
+                  automaticallyImplyLeading: false,
+                  centerTitle: true,
+                  flexibleSpace: const _BlurHeader(),
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Missions',
+                          style: AppTheme.displayLarge.copyWith(
+                            color: AppColors.onDark,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            height: 1.0,
                           ),
-                        ],
-                      ),
+                        ),
+                        _WalletPill(value: user.walletBalance),
+                      ],
                     ),
                   ),
                 ),
@@ -202,9 +198,9 @@ class _MissionsBodyState extends ConsumerState<_MissionsBody> {
 }
 
 class _BlurHeader extends StatelessWidget {
-  const _BlurHeader({required this.child});
+  const _BlurHeader({this.child});
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -218,40 +214,10 @@ class _BlurHeader extends StatelessWidget {
               bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
             ),
           ),
-          child: child,
+          child: child ?? const SizedBox.expand(),
         ),
       ),
     );
-  }
-}
-
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _PinnedHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-  });
-
-  @override
-  final double minExtent;
-  @override
-  final double maxExtent;
-  final Widget child;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return minExtent != oldDelegate.minExtent ||
-        maxExtent != oldDelegate.maxExtent ||
-        child != oldDelegate.child;
   }
 }
 

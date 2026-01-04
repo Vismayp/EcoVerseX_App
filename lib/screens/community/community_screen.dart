@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../config/theme.dart';
 import '../../providers/community_provider.dart';
@@ -9,6 +10,7 @@ import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
 import '../../widgets/neo/neo_section_header.dart';
+import '../../data/models.dart';
 
 class CommunityScreen extends ConsumerWidget {
   const CommunityScreen({super.key});
@@ -28,43 +30,46 @@ class CommunityScreen extends ConsumerWidget {
             SliverAppBar(
               pinned: true,
               floating: false,
-              backgroundColor: AppColors.backgroundDark.withOpacity(0.86),
+              backgroundColor: Colors.transparent,
               elevation: 0,
               automaticallyImplyLeading: false,
-              centerTitle: false,
+              centerTitle: true,
               titleSpacing: 0,
               toolbarHeight: 82,
-              title: _BlurHeader(
-                child: Container(
-                  height: 82,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const _AvatarWithBadge(
-                            imageUrl: _avatarUrl,
-                            badgeText: '15',
+              flexibleSpace: const _BlurHeader(),
+              title: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        userAsync.when(
+                          data: (user) => _AvatarWithBadge(
+                            imageUrl: user.photoURL,
+                            badgeText: user.rank > 0 && user.rank < 100
+                                ? '#${user.rank}'
+                                : '',
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Community Hub',
-                            style: AppTheme.headlineSmall.copyWith(
-                              color: AppColors.onDark,
-                              fontWeight: FontWeight.w900,
-                            ),
+                          loading: () => const CircleAvatar(radius: 21),
+                          error: (_, __) => const CircleAvatar(radius: 21),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Community Hub',
+                          style: AppTheme.headlineSmall.copyWith(
+                            color: AppColors.onDark,
+                            fontWeight: FontWeight.w900,
                           ),
-                        ],
-                      ),
-                      userAsync.when(
-                        data: (user) =>
-                            _BalancePill(balance: user.walletBalance),
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    userAsync.when(
+                      data: (user) => _BalancePill(balance: user.walletBalance),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -74,13 +79,34 @@ class CommunityScreen extends ConsumerWidget {
                 delegate: SliverChildListDelegate(
                   [
                     userAsync.when(
-                      data: (user) => _TierProgressCard(
-                        tierLabel: '${user.tier} Tier',
-                        globalRank: 15,
-                        nextTierLabel: 'Gold Tier',
-                        pointsToNext: 350,
-                        progress: 0.65,
-                      ),
+                      data: (user) {
+                        // Simple tier logic for UI display
+                        String nextTier = 'Silver';
+                        int nextTierPoints = 1000;
+                        if (user.tier == 'SILVER') {
+                          nextTier = 'Gold';
+                          nextTierPoints = 5000;
+                        } else if (user.tier == 'GOLD') {
+                          nextTier = 'Platinum';
+                          nextTierPoints = 10000;
+                        }
+
+                        double progress = user.points / nextTierPoints;
+                        if (progress > 1.0) progress = 1.0;
+
+                        return _TierProgressCard(
+                          tierLabel: '${user.tier} Tier',
+                          globalRank: (user.rank > 0 && user.rank < 100)
+                              ? '#${user.rank}'
+                              : '100+',
+                          nextTierLabel: '$nextTier Tier',
+                          pointsToNext: nextTierPoints - user.points > 0
+                              ? nextTierPoints - user.points
+                              : 0,
+                          progress: progress,
+                          currentPoints: user.points,
+                        );
+                      },
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Text('Error: $e'),
@@ -105,14 +131,33 @@ class CommunityScreen extends ConsumerWidget {
                     circlesAsync.when(
                       data: (circles) => Column(
                         children: circles
-                            .map(
+                            .map<Widget>(
                               (g) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: _CommunityGroupCard(
-                                  title: g.name,
-                                  subtitle: g.description,
-                                  icon: Icons.forum,
-                                  onTap: () {},
+                                  circle: g,
+                                  onTap: () async {
+                                    if (g.link != null && g.link!.isNotEmpty) {
+                                      try {
+                                        String url = g.link!;
+                                        if (!url.startsWith('http') &&
+                                            !url.startsWith('whatsapp://')) {
+                                          url = 'https://$url';
+                                        }
+                                        final uri = Uri.parse(url);
+                                        // Track click
+                                        ref
+                                            .read(apiServiceProvider)
+                                            .trackCircleClick(g.id);
+
+                                        await launchUrl(uri,
+                                            mode:
+                                                LaunchMode.externalApplication);
+                                      } catch (e) {
+                                        debugPrint('Error launching URL: $e');
+                                      }
+                                    }
+                                  },
                                 ),
                               ),
                             )
@@ -121,12 +166,6 @@ class CommunityScreen extends ConsumerWidget {
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Text('Error: $e'),
-                    ),
-                    _CommunityGroupCard(
-                      title: 'Carbon Offset Traders',
-                      subtitle: 'Trade credits and swap tips',
-                      icon: Icons.swap_horiz,
-                      onTap: () {},
                     ),
                   ],
                 ),
@@ -140,23 +179,23 @@ class CommunityScreen extends ConsumerWidget {
 }
 
 class _BlurHeader extends StatelessWidget {
-  final Widget child;
+  final Widget? child;
 
-  const _BlurHeader({required this.child});
+  const _BlurHeader({this.child});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.backgroundDark.withOpacity(0.86),
+            color: AppColors.backgroundDark.withOpacity(0.92),
             border: Border(
               bottom: BorderSide(color: Colors.white.withOpacity(0.06)),
             ),
           ),
-          child: child,
+          child: child ?? const SizedBox.expand(),
         ),
       ),
     );
@@ -189,25 +228,26 @@ class _AvatarWithBadge extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
-          right: -2,
-          bottom: -2,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.backgroundDark, width: 2),
-            ),
-            child: Text(
-              badgeText,
-              style: AppTheme.caption.copyWith(
-                color: AppColors.backgroundDark,
-                fontWeight: FontWeight.w900,
+        if (badgeText.isNotEmpty)
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppColors.backgroundDark, width: 2),
+              ),
+              child: Text(
+                badgeText,
+                style: AppTheme.caption.copyWith(
+                  color: AppColors.backgroundDark,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -243,10 +283,11 @@ class _BalancePill extends StatelessWidget {
 
 class _TierProgressCard extends StatelessWidget {
   final String tierLabel;
-  final int globalRank;
+  final String globalRank;
   final String nextTierLabel;
   final int pointsToNext;
   final double progress;
+  final int currentPoints;
 
   const _TierProgressCard({
     required this.tierLabel,
@@ -254,6 +295,7 @@ class _TierProgressCard extends StatelessWidget {
     required this.nextTierLabel,
     required this.pointsToNext,
     required this.progress,
+    required this.currentPoints,
   });
 
   @override
@@ -302,6 +344,14 @@ class _TierProgressCard extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '($currentPoints pts)',
+                            style: AppTheme.caption.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -319,7 +369,7 @@ class _TierProgressCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '#$globalRank',
+                        globalRank,
                         style: AppTheme.headlineSmall.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w900,
@@ -370,34 +420,42 @@ class _TierProgressCard extends StatelessWidget {
   }
 }
 
-class _LeaderboardList extends StatelessWidget {
+class _LeaderboardList extends ConsumerWidget {
   const _LeaderboardList();
 
   @override
-  Widget build(BuildContext context) {
-    const entries = [
-      _LeaderboardEntry(
-        rank: 1,
-        handle: '@EcoWarrior99',
-        tier: 'Gold Tier',
-        points: 5400,
-        isTop: true,
-      ),
-      _LeaderboardEntry(rank: 2, handle: '@GreenGiant', points: 4850),
-      _LeaderboardEntry(rank: 3, handle: '@SustainAlice', points: 4120),
-      _LeaderboardEntry(
-          rank: 15, handle: '@EcoUser_15', points: 2350, isYou: true),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final leaderboardAsync = ref.watch(leaderboardProvider);
+    final currentUserAsync = ref.watch(userProfileProvider);
 
-    return Column(
-      children: entries
-          .map(
-            (e) => Padding(
+    return leaderboardAsync.when(
+      data: (users) {
+        final currentUser = currentUserAsync.value;
+
+        return Column(
+          children: users.asMap().entries.map<Widget>((entry) {
+            final index = entry.key;
+            final user = entry.value;
+            final isYou = currentUser?.id == user.id;
+
+            return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _LeaderboardTile(entry: e),
-            ),
-          )
-          .toList(growable: false),
+              child: _LeaderboardTile(
+                entry: _LeaderboardEntry(
+                  rank: index + 1,
+                  handle: user.name,
+                  tier: '${user.tier} Tier',
+                  points: user.points,
+                  isTop: index == 0,
+                  isYou: isYou,
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Text('Error: $e'),
     );
   }
 }
@@ -592,17 +650,39 @@ class _RankBadge extends StatelessWidget {
 }
 
 class _CommunityGroupCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
+  final CommunityCircle circle;
   final VoidCallback onTap;
 
   const _CommunityGroupCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
+    required this.circle,
     required this.onTap,
   });
+
+  IconData _getPlatformIcon(String? platform) {
+    switch (platform?.toUpperCase()) {
+      case 'WHATSAPP':
+        return Icons.chat;
+      case 'TELEGRAM':
+        return Icons.send;
+      case 'INSTAGRAM':
+        return Icons.camera_alt;
+      default:
+        return Icons.forum;
+    }
+  }
+
+  Color _getPlatformColor(String? platform) {
+    switch (platform?.toUpperCase()) {
+      case 'WHATSAPP':
+        return const Color(0xFF25D366);
+      case 'TELEGRAM':
+        return const Color(0xFF0088cc);
+      case 'INSTAGRAM':
+        return const Color(0xFFE1306C);
+      default:
+        return AppColors.primary;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -618,9 +698,13 @@ class _CommunityGroupCard extends StatelessWidget {
               width: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.12),
+                color: _getPlatformColor(circle.platform).withOpacity(0.12),
               ),
-              child: Icon(icon, color: AppColors.primary, size: 26),
+              child: Icon(
+                _getPlatformIcon(circle.platform),
+                color: _getPlatformColor(circle.platform),
+                size: 26,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -628,7 +712,7 @@ class _CommunityGroupCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    circle.name,
                     style: AppTheme.bodyLarge.copyWith(
                       color: AppColors.onDark,
                       fontWeight: FontWeight.w900,
@@ -636,7 +720,7 @@ class _CommunityGroupCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    circle.description,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style:
@@ -646,7 +730,21 @@ class _CommunityGroupCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Icon(Icons.chevron_right, color: AppColors.mutedOnDark),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Icon(Icons.chevron_right, color: AppColors.mutedOnDark),
+                if (circle.membersCount > 0)
+                  Text(
+                    '${circle.membersCount} members',
+                    style: AppTheme.caption.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),

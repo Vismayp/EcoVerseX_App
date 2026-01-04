@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/theme.dart';
-import '../../data/mock_data.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/eco_coin_icon.dart';
 import '../../widgets/neo/neo_card.dart';
@@ -15,6 +14,7 @@ import '../../widgets/digital_tree_video_widget.dart';
 import '../carbon/carbon_market_screen.dart';
 import '../tours/tours_screen.dart';
 import 'activity_history_screen.dart';
+import 'notifications_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -45,61 +45,67 @@ class DashboardScreen extends ConsumerWidget {
               SliverAppBar(
                 pinned: true,
                 floating: false,
-                backgroundColor: AppColors.backgroundDark.withOpacity(0.86),
+                backgroundColor: Colors.transparent,
                 elevation: 0,
                 automaticallyImplyLeading: false,
-                centerTitle: false,
+                centerTitle: true,
                 titleSpacing: 0,
-                toolbarHeight: 100,
-                title: _BlurHeader(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 32, 16, 10),
-                    child: Row(
-                      children: [
-                        _AvatarWithStatus(
-                          imageUrl: user.photoURL,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Welcome back',
-                                style: AppTheme.caption.copyWith(
-                                  color: AppColors.faintOnDark,
-                                  letterSpacing: 0.8,
-                                ),
+                toolbarHeight: 90,
+                flexibleSpace: const _BlurHeader(child: SizedBox.expand()),
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      _AvatarWithStatus(
+                        imageUrl: user.photoURL,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Welcome back',
+                              style: AppTheme.caption.copyWith(
+                                color: AppColors.faintOnDark,
+                                letterSpacing: 0.8,
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                firstName,
-                                style: AppTheme.headlineMedium.copyWith(
-                                  color: AppColors.onDark,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.0,
-                                ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              firstName,
+                              style: AppTheme.headlineMedium.copyWith(
+                                color: AppColors.onDark,
+                                fontWeight: FontWeight.w800,
+                                height: 1.0,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        NeoIconButton(
-                          tooltip: 'Refresh',
-                          icon: Icons.refresh,
-                          onPressed: () {
-                            ref.invalidate(userProfileProvider);
-                            ref.invalidate(activitiesProvider);
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        NeoIconButton(
-                          tooltip: 'Notifications',
-                          icon: Icons.notifications,
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
+                      ),
+                      NeoIconButton(
+                        tooltip: 'Refresh',
+                        icon: Icons.refresh,
+                        onPressed: () {
+                          ref.invalidate(userProfileProvider);
+                          ref.invalidate(activitiesProvider);
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      NeoIconButton(
+                        tooltip: 'Notifications',
+                        icon: Icons.notifications,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -368,16 +374,18 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 class _BlurHeader extends StatelessWidget {
-  const _BlurHeader({required this.child});
+  const _BlurHeader({this.child});
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: DecoratedBox(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
           decoration: BoxDecoration(
             color: AppColors.backgroundDark.withOpacity(0.92),
             border: Border(
